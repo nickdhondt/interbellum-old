@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /game/
+Disallow: /map/
+Disallow: /droomreis/
