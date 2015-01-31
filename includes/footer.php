@@ -1,6 +1,6 @@
 </main>
 <footer>
-    &copy; Goldenratio
+    &copy; Goldenratio Interactive
 </footer>
 </body>
 </html>
