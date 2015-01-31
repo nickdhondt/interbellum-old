@@ -16,8 +16,10 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
 <div id="content">
     <?php
 
+    // Get the number of unread messages
     $unread_messages = unread_messages($user_id);
 
+    // A number greater than 9 is replaced by 9+
     if ($unread_messages < 1) {
         $unread_messages = "";
     } elseif ($unread_messages > 9) {
@@ -83,7 +85,7 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
                 <a href="messages.php" id="inbox">
                     <img src="img/inbox_icon.svg" alt="Inbox"/>
                     <?php
-
+                    // If there are unread messages a div is added containing the number of unread messages
                         if ($unread_messages > 0) {
                             ?>
                     <div id="unread">
