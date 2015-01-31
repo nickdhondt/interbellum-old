@@ -1,0 +1,226 @@
+-- phpMyAdmin SQL Dump
+-- version 4.2.11
+-- http://www.phpmyadmin.net
+--
+-- Machine: localhost
+-- Gegenereerd op: 31 jan 2015 om 12:46
+-- Serverversie: 5.6.21
+-- PHP-versie: 5.5.19
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+--
+-- Databank: `interbellum`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `building`
+--
+
+CREATE TABLE IF NOT EXISTS `building` (
+`id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `headquarters` int(11) NOT NULL,
+  `steel_factory` int(11) NOT NULL,
+  `coal_mine` int(11) NOT NULL,
+  `woodchopper` int(11) NOT NULL,
+  `storage` int(11) NOT NULL,
+  `kitchen` int(11) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `city`
+--
+
+CREATE TABLE IF NOT EXISTS `city` (
+`id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `x` int(11) NOT NULL,
+  `y` int(11) NOT NULL,
+  `steel` decimal(11,5) NOT NULL,
+  `wood` decimal(11,5) NOT NULL,
+  `coal` decimal(11,5) NOT NULL,
+  `update_time` int(11) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `message`
+--
+
+CREATE TABLE IF NOT EXISTS `message` (
+`id` int(11) NOT NULL,
+  `thr_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `senddate` datetime NOT NULL,
+  `body` text NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `session`
+--
+
+CREATE TABLE IF NOT EXISTS `session` (
+`id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_agent` varchar(512) NOT NULL,
+  `remember_hash` varchar(512) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `task`
+--
+
+CREATE TABLE IF NOT EXISTS `task` (
+`id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `building` varchar(64) NOT NULL,
+  `level` int(11) NOT NULL,
+  `update_time` int(11) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `thread`
+--
+
+CREATE TABLE IF NOT EXISTS `thread` (
+`id` int(11) NOT NULL,
+  `thr_name` varchar(64) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `thr_recipient`
+--
+
+CREATE TABLE IF NOT EXISTS `thr_recipient` (
+`id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `thr_id` int(11) NOT NULL,
+  `status` tinyint(4) NOT NULL,
+  `last_mod` int(11) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user`
+--
+
+CREATE TABLE IF NOT EXISTS `user` (
+`id` int(11) NOT NULL,
+  `username` varchar(32) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+
+--
+-- Indexen voor geëxporteerde tabellen
+--
+
+--
+-- Indexen voor tabel `building`
+--
+ALTER TABLE `building`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `city`
+--
+ALTER TABLE `city`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `message`
+--
+ALTER TABLE `message`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `session`
+--
+ALTER TABLE `session`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `task`
+--
+ALTER TABLE `task`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `thread`
+--
+ALTER TABLE `thread`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `thr_recipient`
+--
+ALTER TABLE `thr_recipient`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `user`
+--
+ALTER TABLE `user`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT voor geëxporteerde tabellen
+--
+
+--
+-- AUTO_INCREMENT voor een tabel `building`
+--
+ALTER TABLE `building`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
+--
+-- AUTO_INCREMENT voor een tabel `city`
+--
+ALTER TABLE `city`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=25;
+--
+-- AUTO_INCREMENT voor een tabel `message`
+--
+ALTER TABLE `message`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=274;
+--
+-- AUTO_INCREMENT voor een tabel `session`
+--
+ALTER TABLE `session`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+--
+-- AUTO_INCREMENT voor een tabel `task`
+--
+ALTER TABLE `task`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=45;
+--
+-- AUTO_INCREMENT voor een tabel `thread`
+--
+ALTER TABLE `thread`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=82;
+--
+-- AUTO_INCREMENT voor een tabel `thr_recipient`
+--
+ALTER TABLE `thr_recipient`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=163;
+--
+-- AUTO_INCREMENT voor een tabel `user`
+--
+ALTER TABLE `user`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=12;
