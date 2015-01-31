@@ -8,6 +8,8 @@
         $page_cal_microseconds = (microtime(true) - $page_cal_start) * 1000;
         echo number_format($page_cal_microseconds, 0, ",", ".");
 
+        mysqli_close($connection);
+
         ?>ms
     </div>
     <div>
