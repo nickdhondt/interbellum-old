@@ -1,9 +1,26 @@
 <?php
 
+/*
+ * List of all the functions in functions.php (not completed yet)
+ * Please add a newly made function to this list
+ *
+ * get_buildings_game_info()
+ * get_buildings_level_info()
+ * ...
+ *
+ *
+ *
+ *
+ *
+ */
+
+// This file is included at the top of each page. The microtime at the beginning of the script is saved in a variabele
+// In the footer the execution time is calculated, based on this variable
 $page_cal_start = microtime(true);
 
 session_start();
 
+// Connection to the database
 include "database/connect.php";
 
 // Setting the timezeone to GMT+1
@@ -11,8 +28,8 @@ date_default_timezone_set("Europe/Brussels");
 
 /* Gamedata */
 
-// This function will return gamedata needed to create hyperlinks
-// The first string inside the second array is supposed to be the tekst on which to click
+// This function will return "gamedata" needed to create hyperlinks, etc.
+// The first string inside the second array is supposed to be the text on which to click in the city.php page
 // The second string is the name of the page (e.g. bhead.php)
 function get_building_game_info() {
     return array(
@@ -112,12 +129,12 @@ function get_building_level_info() {
 }
 
 // Calculates the building speed improvement when upgrading buildings
-// The returned double is between 0 and 1, so by multiplying the building time (in seconds) with this coefficient you get a shorter building time
+// The returned double is between 0 and 1, so by multiplying the building time (in seconds) with this coefficient you get a smeller building time
 function calculate_speed_improvement($level, $constant, $current_building_seconds) {
     return (pow($constant, $level) * $current_building_seconds);
 }
 
-// Calculates the total population that is allowed in a city
+// Calculates the total population that is allowed in a city based on the level
 function calculate_population_storage($base, $level, $constant) {
     return ($level + 4 * $level + 4 * $level + 4) + $base / $constant;
 }
@@ -148,6 +165,7 @@ function output_errors($errors) {
 /* User */
 
 // Checks if a user exists in the database
+// Returns false, or the user id
 function user_exists($username) {
     // The connection to the db needs to be accessible inside the function
     global $connection;
@@ -161,11 +179,11 @@ function user_exists($username) {
     } else {
         if (mysqli_num_rows($sql) === 1) {
             // If there exactly 1 user, his id will be returned
-            // Fetch the id and put it in an associative array
+            // Fetch the id and return the value
             $user_id = mysqli_fetch_assoc($sql);
             return $user_id["id"];
         } else {
-            // If there are more or less than 1 username, the user will not be allowed to log in
+            // If there are more or less than 1 username false is returned
             return false;
         }
     }
@@ -174,14 +192,16 @@ function user_exists($username) {
 // Selects fields base on the given fields array
 function user_data($user_id, $fields) {
     global $connection;
-    if (!empty ($fields)) {
-        $sql_fields = implode(", ", $fields);
-    } else {
-        $sql_fields = "*";
-    }
 
+    // We can't select an array, the array needs to be converted to a string understandable for SQL
+    $sql_fields = prepare_fields_select($fields);
+
+    // Execute the mysql query
+    // Select all the specified fields for a user
     $sql = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id='$user_id'");
 
+    // If the query failed, an error is returned
+    // If it succeeded the requested fields are returned
     if (!$sql) {
         return mysqli_error($connection);
     } else {
@@ -189,11 +209,16 @@ function user_data($user_id, $fields) {
     }
 }
 
+// Update/change fields in the user table
 function update_user($user_id, $fields) {
     global $connection;
 
+    // Making a string from the $fields array
     $values = prepare_fields($fields);
 
+    // Execute the query, update the specified fields for a user
+    // If the query succeeded true is returned
+    // If the query failed an error is returned
     if (mysqli_query($connection, "UPDATE user SET $values WHERE id=$user_id")) {
         return true;
     } else {
@@ -201,10 +226,14 @@ function update_user($user_id, $fields) {
     }
 }
 
+// Check if a user is logged in
 function user_logged_in () {
+    // If there is a user id in the session superglobal, the id is returned
+    // If there isn't a user id, false is returned
     if (!empty($_SESSION["user_id"])) {
         return $_SESSION["user_id"];
     } elseif (!empty($_COOKIE["remember_me_id"]) && !empty($_COOKIE["remember_me_hash"])) {
+        // Doesn't work correctly, needs fix
         $cookie_id = $_COOKIE["remember_me_id"];
         $cookie_hash = $_COOKIE["remember_me_hash"];
         $session_hash = get_session_hash($cookie_id);
@@ -223,6 +252,7 @@ function user_logged_in () {
 
 /* Session */
 
+// Will be deleted in favour of a better "remember me" system
 function get_session_data($session_id, $fields) {
     global $connection;
 
@@ -241,6 +271,7 @@ function get_session_data($session_id, $fields) {
     }
 }
 
+// Will be deleted in favour of a better "remember me" system
 function get_session_hash($session_id) {
     global $connection;
 
@@ -259,9 +290,19 @@ function get_session_hash($session_id) {
 
 /* Thread */
 
+// The messaging system works like this:
+// There is 1 thread, multiple "breadcrumbs" and multiple messages
+// breadcrumbs are linked to a thread, each user has a breadcrumb that holds information like the status (read/unread), time of last message, user id and thread id
+// There are multiple breadcrumbs with the same thread id. Each member of a conversation has his own breadcrumb
+// Messages are linked to a thread, not to the breadcrumbs
+// The inbox of a user displays the breadcrumbs a user owns
+
+// Makes a new thread
 function make_thread($thread) {
     global $connection;
-    //$datetime = date ("Y-m-d H:i:s");
+
+    // If the query succeeds the id of the just made thread is returned
+    // If it fails false is returned
     if (mysqli_query($connection, "INSERT INTO thread (thr_name) VALUES ('$thread')")) {
         return mysqli_insert_id($connection);
     } else {
@@ -269,10 +310,19 @@ function make_thread($thread) {
     }
 }
 
+// Make a new message
 function make_message($thr_id, $user_id, $body) {
     global $connection;
+
+    // Escape special characters in a string to use in SQL statement
+    // eg. "\", "'", etc.
     $body = mysqli_real_escape_string($connection, $body);
+    //Format the current date
     $datetime = date("Y-m-d H:i:s");
+
+    // Insert the sender, thread id, formatted date and safe message body
+    // The the query fails, an error is returned
+    // If it succeeds, true is returned
     if (mysqli_query($connection, "INSERT INTO message (thr_id, user_id, senddate, body) VALUES ('$thr_id', '$user_id', '$datetime', '$body')")) {
         return true;
     } else {
@@ -280,110 +330,178 @@ function make_message($thr_id, $user_id, $body) {
     }
 }
 
+// Make a "breadcrumb"
 function make_thread_breadcrumbs($thr_id, $user_id, $status=0) {
     global $connection;
+
+    // Set the current time
     $time = time();
+
+    // Insert the user id date, etc. in the breadcrumbs table (thr_recipient)
+    // Return true or false if the query succeeds of fails
     if (mysqli_query($connection, "INSERT INTO thr_recipient (thr_id, user_id, last_mod, status) VALUES ('$thr_id', '$user_id', $time, $status)")) {
-        echo mysqli_error($connection);
         return true;
     } else {
         return false;
     }
 }
 
+// Select a users threads based on the breadcrumbs
 function get_thread_breadcrumbs($user_id) {
     global $connection;
+
+    // This array will be filled with the users threads
     $all_threads = array();
 
-$sql = mysqli_query($connection, "SELECT thr_id, status, last_mod FROM thr_recipient WHERE user_id='$user_id' AND (status=0 OR status=1) ORDER BY last_mod DESC") or die(mysqli_error($connection));
-    while ($thread_id = mysqli_fetch_assoc($sql)) {
-        $all_threads[] = array (
-            "thr_id" => $thread_id["thr_id"],
-            "status" => $thread_id["status"],
-            "last_mod" => $thread_id["last_mod"]);
-    }
+    // Select all the threads the user has read or are unread (not deleted threads, these have status 2)
+    $sql = mysqli_query($connection, "SELECT thr_id, status, last_mod FROM thr_recipient WHERE user_id='$user_id' AND (status=0 OR status=1) ORDER BY last_mod DESC");
 
-    return $all_threads;
+    // If the query failed an error is returned
+    // If is succeeded the data is returned
+    if (!$sql) {
+        return mysqli_error($connection);
+    } else {
+        // Loop through all the selected rows and put them in an associative array
+        while ($thread_id = mysqli_fetch_assoc($sql)) {
+            $all_threads[] = array (
+                "thr_id" => $thread_id["thr_id"],
+                "status" => $thread_id["status"],
+                "last_mod" => $thread_id["last_mod"]);
+        }
+
+        // Return the array
+        return $all_threads;
+    }
 }
 
+// Select thread data (currently only the thread name)
 function get_thread_data($thr_id) {
     global $connection;
-    $sql = mysqli_query($connection, "SELECT thr_name FROM thread WHERE id='$thr_id'") or die(mysqli_error($connection));
-    return mysqli_fetch_assoc($sql);
+
+    // SQL query to select the thread name for a thread id
+    $sql = mysqli_query($connection, "SELECT thr_name FROM thread WHERE id='$thr_id'");
+
+    // If the query fails an error is returned
+    // If it succeeds an array containing the requested data is returned
+    if (!$sql) {
+        return mysqli_error($connection);
+    } else  {
+        return mysqli_fetch_assoc($sql);
+    }
 }
 
+// Fetch the message of a thread
+// Maximum 15 messages are returned -> only 1 page of messages
 function get_message_data($thread_id, $page) {
     global $connection;
 
+    // Calculate where to start selecting messages based on the page the user is viewing
+    // Page 0 starts at message 0 page 4 at message 60
     $start = $page * 15;
 
+    // This array will be filled withe the selected messages
     $all_messages_data = array();
+
+    // The query selects the send date, user id en message body for all message in a page
+    // Starting at message $start and ending 15 messages later
     $sql = mysqli_query($connection, "SELECT user_id, senddate, body FROM message WHERE thr_id='$thread_id' ORDER BY senddate DESC LIMIT $start,15") or die(mysqli_error($connection));
 
-    while($message_data = mysqli_fetch_assoc($sql)) {
-        $all_messages_data[] = $message_data;
+    // Return an error or return the messages in an array
+    if (!$sql) {
+        return mysqli_error($connection);
+    } else {
+        while($message_data = mysqli_fetch_assoc($sql)) {
+            $all_messages_data[] = $message_data;
+        }
+        return $all_messages_data;
     }
-    return $all_messages_data;
 }
 
+// Detect a url in text and make a hyperlink
 function make_link_from_url($text){
 
     // Look for these anomalies
-    $reg_exUrl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,10}(\/\S*|:\S*)?/";
+    $reg_ex_url = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,10}(\/\S*|:\S*)?/";
 
-    // Store the matches
-    preg_match_all ($reg_exUrl, $text, $matches);
+    // Search for the pattern and store the matches in an array ($matches)
+    preg_match_all ($reg_ex_url, $text, $matches);
 
-    $usedPatterns = array();
+    $used_patterns = array();
 
+    // Loop through the matches
     foreach ($matches[0] as $pattern){
+        if (!array_key_exists ($pattern, $used_patterns)){
+            $used_patterns[$pattern] = true;
 
-        if (!array_key_exists ($pattern, $usedPatterns)){
-
-            $usedPatterns[$pattern]=true;
+            // Replace the pattern (url) by a hyperlink
             $text = str_replace ($pattern, "<strong><a href=\"" . $pattern . "\" target=\"_blank\" rel=\"nofollow\">" . $pattern . "</a></strong>", $text);
-
         }
     }
-
+    // Return the text with hyperlinks
     return $text;
-
 }
 
-function format_message($body, $state = "COMPLETE") {
-    if ($state === "PREVIEW") {
+// This function formats text and can be used for multiple purposes
+// By default it does a "complete" format
+function format_message($body, $mode = "COMPLETE") {
+    // Preview mode. This is used to display the little preview of a conversation in the inbox
+    if ($mode === "PREVIEW") {
+        // If the body is longer than 75 characters, it is cut to 75 characters and an ellipsis (...) is added to the end
         if (strlen($body) > 75) {
+            // Return the formatted string
             return substr($body, 0, 75) . "...";
         } else {
+            // If the body is shorter than 75 characters it is returned unmodified
             return $body;
         }
-    } elseif ($state === "COMPLETE") {
+    } elseif ($mode === "COMPLETE") {
+        // Complete mode. Used to display complete messages in a conversation
+        // Replace \n\r (new line carriage return) by a <br /> tag, essentially making the enters display in html
+        // Also detect urls and replace them by hyperlinks
         return nl2br(make_link_from_url($body));
+    } else {
+        // If the mode is not recognized just the <br /> tags are added
+        return nl2br($body);
     }
 }
 
+// Returns all the id of the users that are participating in a conversation (even if the user has deleted a conversation)
 function get_user_id_from_breadcrumbs($thr_id) {
     global $connection;
 
+    // Id's will be put in this array
     $all_authorized_ids = array();
-    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id='$thr_id'") or die(mysqli_error($connection));
 
-    while ($user_id = mysqli_fetch_assoc($sql)) {
-        $all_authorized_ids[] = $user_id;
+    // The users who are "authorized", who have a breadcrumb with specified thread is are selected
+    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id='$thr_id'");
+
+    // Return an error or return the user id's
+    if (!$sql) {
+        return mysqli_error($connection);
+    } else {
+        // Loop through the selected rows and put them in an array
+        while ($user_id = mysqli_fetch_assoc($sql)) {
+            $all_authorized_ids[] = $user_id;
+        }
+
+        // return the array
+        return $all_authorized_ids;
     }
-
-    return $all_authorized_ids;
 }
 
+// Make a string safe, prevent XSS
 function sanitize ($text) {
     return htmlspecialchars($text, ENT_QUOTES);
 }
 
+// Update a breadcrumb
 function update_breadcrumb($thr_id, $user_id, $fields) {
     global $connection;
 
+    // Convert the fields array to a string with field and value
     $values = prepare_fields($fields);
 
+    // Return true if the query succeeds, or return an erro
     if (mysqli_query($connection, "UPDATE thr_recipient SET $values WHERE user_id=$user_id && thr_id=$thr_id")) {
         return true;
     } else {
@@ -391,31 +509,43 @@ function update_breadcrumb($thr_id, $user_id, $fields) {
     }
 }
 
+// Converts an array to a string containing the field to update and the updated value
 function prepare_fields ($fields) {
     $single_values = array();
 
-    foreach ($fields as $column => $value) {
-        if (gettype($value) === "integer" || gettype($column) === "double") {
-            $single_values[] = $column . "=" . $value;
+    // Loop through the array and split it in the key and the value
+    // The key represents the field and the value is the new value which will be put into the db
+    foreach ($fields as $field => $value) {
+        // Add the field and value to an array
+        // exemple: (username='new username')
+        // If the value is a string, put single quotes around the value
+        if (gettype($value) === "integer" || gettype($field) === "double") {
+            $single_values[] = $field . "=" . $value;
         } else {
-            $single_values[] = $column . "='" . $value . "'";
+            $single_values[] = $field . "='" . $value . "'";
         }
     }
 
+    // Return the array as a string
     return implode (", ", $single_values);
 }
 
+// Counts the unread messages
 function unread_messages ($user_id) {
+    // Get the users breadcrumbs
     $thr_breadcrumbs = get_thread_breadcrumbs($user_id);
+    // Unread messages default set to 0
     $unread_messages = "0";
 
+    // Loop through the breadcrumbs if a breadcrumb with status 0 (=unread) is found, $unread_messages in increased by 1
     foreach ($thr_breadcrumbs as $thr_breadcrumb) {
         if ($thr_breadcrumb["status"] === "0") {
             $unread_messages++;
         }
     }
-    count ($thr_breadcrumbs);
 
+    // If there are more than 9 unread messages, 9+ will be returned
+    // If there are less, the number of unread messages will be returned
     if ($unread_messages <= "9") {
         return $unread_messages;
     } else {
@@ -423,11 +553,15 @@ function unread_messages ($user_id) {
     }
 }
 
+// Select the last message in a thread
 function get_last_message ($thr_id) {
     global $connection;
 
+    // Select the last message in a thread
+    // Limit makes the query select only one message
     $sql = mysqli_query($connection, "SELECT user_id, body FROM message WHERE thr_id=$thr_id ORDER BY senddate DESC LIMIT 1");
 
+    // Return an error or return the message and it's sender (user id)
     if (!$sql) {
         return mysqli_error($connection);
     } else {
@@ -444,6 +578,8 @@ function format_elapsed_seconds ($seconds) {
         return round($seconds/86400) . "d";
     } elseif ($seconds > 2678399) {
         return "+31d";
+    } else {
+        return "?";
     }
 }
 
@@ -1162,4 +1298,42 @@ function html_page_title($filename) {
 
     // Return the title
     return $title;
+}
+
+function mass_user_data($user_ids, $fields) {
+    global $connection;
+
+    // Prepare the fields we want to select so they are correct mysql syntax
+    $sql_fields = prepare_fields_select($fields);
+
+    // Make a string from the array of id's
+    $user_ids_for_sql = implode(",", $user_ids);
+
+    // Select the specified fields where the user id is in the range of the given id's the script requests
+    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM `user` WHERE `id` in ($user_ids_for_sql)");
+
+    if (!$sql_get_data) {
+        // Return error information if the query failed
+        return mysqli_error($connection);
+    } else {
+        // make an array with the requested data and return it
+        $data = array();
+        while($row = mysqli_fetch_assoc($sql_get_data)) {
+            $data[] = $row;
+        }
+        return $data;
+    }
+}
+
+function prepare_fields_select($fields) {
+    // Prepare the fields we want to select so they are correct mysql syntax
+    // If there aren't any fields sent, select all the fields "*"
+    if (!empty ($fields)) {
+        $sql_fields = implode(", ", $fields);
+    } else {
+        $sql_fields = "*";
+    }
+
+    // Return the string in correct form for mysql
+    return $sql_fields;
 }
