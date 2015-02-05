@@ -1,7 +1,7 @@
 <?php
 
 // functions.php is required
-// Note: this file is not in the /game/includes directory, but in the /includes directory
+// Note: this file is not in the /game/includes directory, but in the /includes directory.
 require_once "../includes/functions.php";
 
 // This file checks a number of things (is the user logged in?, etc.) and fetches basic information (resourses in the current city, etc.)
