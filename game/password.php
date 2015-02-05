@@ -2,11 +2,14 @@
 
 require_once "../includes/functions.php";
 
-$user_id = user_logged_in();
-if ($user_id === false) {
-    header("Location: ../index.php");
-    die();
+if (count_all_users() > 0) {
+    $user_id = user_logged_in();
+    if ($user_id === false) {
+        header("Location: ../index.php");
+        die();
+    }
 }
+
 
 $password = "";
 $hash = "";

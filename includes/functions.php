@@ -1310,7 +1310,7 @@ function mass_user_data($user_ids, $fields) {
     $user_ids_for_sql = implode(",", $user_ids);
 
     // Select the specified fields where the user id is in the range of the given id's the script requests
-    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM `user` WHERE `id` in ($user_ids_for_sql)");
+    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id in ($user_ids_for_sql)");
 
     if (!$sql_get_data) {
         // Return error information if the query failed
@@ -1336,4 +1336,14 @@ function prepare_fields_select($fields) {
 
     // Return the string in correct form for mysql
     return $sql_fields;
+}
+
+function count_all_users() {
+    global $connection;
+
+    $sql = mysqli_query($connection, "SELECT COUNT(id) FROM user");
+
+    $all_users = mysqli_fetch_assoc($sql);
+
+    return $all_users["COUNT(id)"];
 }
