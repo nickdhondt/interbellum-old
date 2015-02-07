@@ -57,7 +57,7 @@ if (isset($_POST["btn_send"])) {
             // We add a different error message based on the amount of wrong recipients. Either 1 or more.
             // If $last_wrong_user is empty, this means there is only one wrong recipient (see above)
             if (empty($last_wrong_user)) {
-                $errors[] = "De gebruiker " . $wrongusers[0] . " bstaat niet";
+                $errors[] = "De gebruiker " . $wrongusers[0] . " bestaat niet";
             } else {
                 $allwrongusers = implode(", ", $wrongusers);
                 $errors[] = "De gebruikers " . $allwrongusers . " en " . $last_wrong_user . " bestaan niet";
