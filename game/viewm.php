@@ -57,7 +57,7 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
         }
     }
 
-    // If the user is authorized, and has not deleted the massage, the user will noy be redirected to his inbox
+    // If the user is authorized, and has not deleted the message, the user will not be redirected to his inbox
     // The status of his breadcrumb (thr_recipient table in database contains all the "breadcrumbs") is set to 1
     // Which means the user has read the message
     if ($authorzation === true && $deleted === false) {
@@ -76,7 +76,7 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
         die();
     }
 } else {
-    // If the user does noet visit this page correctly (delete/thread should be in the querystring), he is redirected back to the inbox
+    // If the user does not visit this page correctly (delete/thread should be in the querystring), he is redirected back to the inbox
     header("Location: messages.php");
     die();
 }
