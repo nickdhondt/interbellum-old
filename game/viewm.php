@@ -30,6 +30,7 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
     // Get only the id from recipients who did not delete this thread
     $all_members_id = thread_recipients($thr_id);
     $all_members_array = array();
+
     // Deleted is set to true, it will be false if the user didn't delete the message
     // This is checked later in the script
     $deleted = true;
@@ -37,14 +38,15 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
         // Get the usernames of the members of this conversation
         // Note: only the members who didn't delete the conversation
         $fields = array("username");
-        $member_data = user_data($member_id, $fields);
+        $member_data = user_data($member_id["user_id"], $fields);
         // Add the usernames to an array
         $all_members_array[] = $member_data["username"];
         // If the users id is present in the list of participant who didn't delete this message, the message is not deleted and the deleted variabel is set to false
-        if ($member_id === $user_id) {
+        if ($member_id["user_id"] === $user_id) {
             $deleted = false;
         }
     }
+
     // Make a string with all the conversation members, separated by a comma
     $all_members = implode(", ", $all_members_array);
 
@@ -66,6 +68,22 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
     } else {
         header("Location: messages.php");
         die();
+    }
+
+    // Make an empty array that will hold all the id's of users who have opened this thread
+    $read_by_id = array();
+
+    // Loop through all the breadcrumbs and determine if the user has opened the thread or not
+    foreach($thread_breadcrumbs as $read_by_data) {
+        // If the status is 1 or 2, this means the user has opened the thread. It is read or read and deleted
+        if ($read_by_data["status"] == 2 || $read_by_data["status"] == 1) {
+            // Add the id to the array if it has been read or deleted
+            $read_by_id[] = $read_by_data["user_id"];
+        }
+    }
+
+    if (!in_array($user_id, $read_by_id)) {
+        $read_by_id[] = $user_id;
     }
 
     // If the user has clicked delete ("verwijderen"), he will be redirected to the same file but with "delete" in the querystring
@@ -147,9 +165,23 @@ if (!empty($_GET["thread"]) && $authorzation !== false) {
         $all_user_ids[] = $user_id_recipient["user_id"];
     }
 
-    // Get all the usernames of all the listed id' we put in the single dimensional array just above
+    // Get all the usernames of all the listed id's we put in the single dimensional array just above
     $fields_need_username = array("id", "username");
     $usernames_recipients = mass_user_data($all_user_ids, $fields_need_username);
+
+    // Make an empty array that will hold the usernames of the users who have opened this thread
+    $read_by = array();
+
+    // Loop through all the id who have opened this thread
+    foreach ($read_by_id as $need_username_for_read) {
+        // Loop through all the recipents and compare the user id with the user id of the user whi has opened the thread
+        // If they are equal, the username is added to the $read_by array
+        foreach ($usernames_recipients as $username_data) {
+            if ($username_data["id"] === $need_username_for_read) {
+                $read_by[] = $username_data["username"];
+            }
+        }
+    }
 }
 
 // Include the header
@@ -184,21 +216,21 @@ if ($authorzation === true && !empty($_GET["thread"])) {
 
         // This feature is unfinished
         if (isset($messages_count)) {
-            echo implode(" ", display_pages($page, $messages_count, 15));
+            echo display_pages($page, $messages_count, 15, $thr_id);
         }
         ?>
         </center>
     </div>
     <div class="container">
-        <span class="info">
+        <div class="info">
             <img class="info" src="img/group_icon.svg" alt="Gespreksleden"/>
-                        <div><?php echo count($all_members_array); ?> gespreksleden: <?php
-                echo $all_members;
+        </div>
+        <div class="info-hover"><?php echo count($all_members_array); ?> gespreksleden: <?php
+            echo $all_members;
 
             ?>
-            </div>
-            </span>
-            <?php
+        </div>
+        <?php
 
     // Loop through all the messages in a page
     foreach($thread_messages as $message) {
@@ -229,7 +261,38 @@ if ($authorzation === true && !empty($_GET["thread"])) {
         <?php
         }
     }
-    ?>
+
+        // Count the users who read this conversation
+        $total_read_count_users = count($read_by);
+        // The maximum amount of usernames that are printed, the others can be viewed by hovering
+        $show_read_users = 6;
+
+        // If the number of users who read the conversation is greater than the max amount that is set above, "..." is added to the end of the string and the string only contains 6 users
+        if ($total_read_count_users > $show_read_users) {
+            // Make a string off all the users. This will be shown when a user hovers over the div
+            $title_read_hint_string = implode(", ", $read_by);
+
+            // Cut the last user off the array (max $show_read_users users)
+            $read_by = array_slice($read_by, 0, $show_read_users);
+            // Add "..."
+            $read_by[] = "...";
+
+            // Implode the array, this will be displayed on the screen.
+            $read_by_string = implode(", ", $read_by);
+        } else {
+            // Implode the complete array, the complete string will also be shown when hovering
+            $read_by_string = implode(", ", $read_by);
+            $title_read_hint_string = $read_by_string;
+        }
+
+        ?>
+        <div id="read" title="<?php echo $title_read_hint_string; ?>">
+        <?php
+
+        echo "Gezien door: " . $read_by_string;
+        ?>
+        </div>
+        <div id="clear"></div>
     </div>
     <div class="container">
         <center>
@@ -237,7 +300,7 @@ if ($authorzation === true && !empty($_GET["thread"])) {
 
             // This feature is unfinished
             if (isset($messages_count)) {
-                echo implode(" ", display_pages($page, $messages_count, 15));
+                echo display_pages($page, $messages_count, 15, $thr_id, true);
             }
             ?>
         </center>

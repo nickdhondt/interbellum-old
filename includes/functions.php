@@ -473,7 +473,7 @@ function get_user_id_from_breadcrumbs($thr_id) {
     $all_authorized_ids = array();
 
     // The users who are "authorized", who have a breadcrumb with specified thread is are selected
-    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id='$thr_id'");
+    $sql = mysqli_query($connection, "SELECT user_id, status FROM thr_recipient WHERE thr_id='$thr_id'");
 
     // Return an error or return the user id's
     if (!$sql) {
@@ -586,14 +586,18 @@ function format_elapsed_seconds ($seconds) {
 function thread_recipients ($thr_id) {
     global $connection;
 
-    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id=$thr_id AND (status=0 OR status=1)");
+    $sql = mysqli_query($connection, "SELECT user_id, status FROM thr_recipient WHERE thr_id=$thr_id AND (status=0 OR status=1)");
 
     if (!$sql) {
         return mysqli_error($connection);
     } else {
         $all_recipients_id = array();
+        $loop = 0;
         while($recipient_id = mysqli_fetch_assoc($sql)) {
-            $all_recipients_id[] = $recipient_id["user_id"];
+            $all_recipients_id[$loop]["user_id"] = $recipient_id["user_id"];
+            $all_recipients_id[$loop]["status"] = $recipient_id["status"];
+
+            $loop++;
         }
         return $all_recipients_id;
     }
@@ -654,14 +658,61 @@ function count_all_messages($thr_id) {
     }
 }
 
-function display_pages($page, $items_count, $items_per_page) {
+function display_pages($page, $items_count, $items_per_page, $thread_id, $bottom = false) {
     $pages = ceil($items_count / $items_per_page);
     $output = array();
 
-    for ($i = 0; $i < $pages; $i++) {
-            $output[] = $i + 1;
+    $go_to_bottom = "";
+
+    if ($bottom !== false) {
+        $go_to_bottom = "#bottom";
     }
-    return $output;
+
+    $at_end = false;
+    $at_begin = false;
+
+    if ($pages <= 7) {
+        $start = 0;
+        $end = $pages;
+    } else {
+        if ($page <= 3) {
+            $start = 0;
+            $end = 7;
+            $at_end = true;
+        } elseif ($page > 3 && $page < $pages - 4) {
+            $start = $page - 3;
+            $end = $page + 4;
+            $at_begin = true;
+            $at_end = true;
+        } elseif($page >= $pages - 4) {
+            $start = $page - 3;
+            $end = $pages;
+            $at_begin = true;
+        } else {
+            $start = 0;
+            $end = $pages;
+        }
+    }
+
+    if ($at_begin === true) {
+        $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=0" . $go_to_bottom . "\">1</a>";
+        $output[] = "...";
+    }
+
+    for ($i = $start; $i < $end; $i++) {
+        if ($page == $i) {
+            $output[] = "<strong>" . ($i + 1) . "</strong>";
+        } else {
+            $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=" . $i . $go_to_bottom . "\">" . ($i + 1) . "</a>";
+        }
+    }
+
+    if ($at_end === true) {
+        $output[] = "...";
+        $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=" . ($pages - 1) . $go_to_bottom . "\">" . $pages . "</a>";
+    }
+
+    return implode(" ", $output);
 }
 
 function count_citys($user_id) {
@@ -1310,7 +1361,7 @@ function mass_user_data($user_ids, $fields) {
     $user_ids_for_sql = implode(",", $user_ids);
 
     // Select the specified fields where the user id is in the range of the given id's the script requests
-    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM `user` WHERE `id` in ($user_ids_for_sql)");
+    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id in ($user_ids_for_sql)");
 
     if (!$sql_get_data) {
         // Return error information if the query failed
@@ -1336,4 +1387,14 @@ function prepare_fields_select($fields) {
 
     // Return the string in correct form for mysql
     return $sql_fields;
+}
+
+function count_all_users() {
+    global $connection;
+
+    $sql = mysqli_query($connection, "SELECT COUNT(id) FROM user");
+
+    $all_users = mysqli_fetch_assoc($sql);
+
+    return $all_users["COUNT(id)"];
 }

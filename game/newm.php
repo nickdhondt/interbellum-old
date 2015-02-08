@@ -108,12 +108,12 @@ output_errors($errors);
     <ul>
         <li>
             <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" />
-            <span class="info">
+            <div class="info">
                 <img class="info" src="img/info_icon.svg" alt="info" />
-                <div>
-                    Plaats een komma tussen meerdere gebruikers. "gebruiker een, gebruiker twee, etc."
-                </div>
-            </span>
+            </div>
+            <div class="info-hover">
+                Plaats een komma tussen meerdere gebruikers. "gebruiker een, gebruiker twee, etc."
+            </div>
         </li>
         <li>
             <input type="text" name="txt_thread" placeholder="Onderwerp" />
