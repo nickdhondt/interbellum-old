@@ -380,6 +380,16 @@ div.container {
     margin-bottom: 10px;
 }
 
+div.center_container {
+    width: 578px;
+    border: 1px solid #808080;
+    padding: 10px;
+    background: #ffffff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+
 div.container:last-child {
     margin-bottom: 0;
 }
@@ -424,7 +434,6 @@ div.container section:last-child {
 div.info {
     display: inline-block;
     position: relative;
-    margin-right: 5px;
 }
 
 img.info {
@@ -437,6 +446,7 @@ div.info ~ div.info-hover {
     display: none;
     font-size: 0.8em;
     opacity: 0;
+    margin-left: 10px;
 }
 
 div.info:hover ~ div.info-hover{

@@ -210,16 +210,13 @@ if ($authorzation === true && !empty($_GET["thread"])) {
             </div>
         </a>
     </div>
-    <div class="container">
-        <center>
-        <?php
-
-        // This feature is unfinished
-        if (isset($messages_count)) {
-            echo display_pages($page, $messages_count, 15, $thr_id);
-        }
-        ?>
-        </center>
+    <div class="center_container">
+    <?php
+    // This shows all the pages and highlights the current page.
+    if (isset($messages_count)) {
+        echo display_pages($page, $messages_count, 15, $thr_id);
+    }
+    ?>
     </div>
     <div class="container">
         <div class="info">
@@ -294,16 +291,13 @@ if ($authorzation === true && !empty($_GET["thread"])) {
         </div>
         <div id="clear"></div>
     </div>
-    <div class="container">
-        <center>
-            <?php
-
-            // This feature is unfinished
-            if (isset($messages_count)) {
-                echo display_pages($page, $messages_count, 15, $thr_id, true);
-            }
-            ?>
-        </center>
+    <div class="center_container">
+        <?php
+        // This shows all the pages and highlights the current page.
+        if (isset($messages_count)) {
+            echo display_pages($page, $messages_count, 15, $thr_id, true);
+        }
+        ?>
     </div>
         <?php
 }
