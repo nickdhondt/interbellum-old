@@ -214,7 +214,29 @@ if ($authorzation === true && !empty($_GET["thread"])) {
     <?php
     // This shows all the pages and highlights the current page.
     if (isset($messages_count)) {
-        echo display_pages($page, $messages_count, 15, $thr_id);
+        // The links to pages on the top of the page don't have a fragment, the links at the bottom have a #bottom fragment
+        // These arrays will contain the pages in their final form (in <a> or <strong> tags, etc.)
+        // These arrays will then be converted to a string a printed
+        $pages_top = array();
+        $pages_bottom = array();
+
+        // Request the pages based on the total amount of messages that need to be displayed and the total amount of messages that will be displayed in one page
+        foreach (display_pages($page, $messages_count, 15) as $page_link) {
+            // An element that display_pages() return can be an element that is an actual page (and will be a hyperlink)
+            // Or it can be something link "...", the parameter href is meant for a guide to determine if the returned element needs to be sent in a pair of <a> tags
+            if ($page_link["href"] === false) {
+                $pages_top[] = $page_link["page"];
+                $pages_bottom[] = $page_link["page"];
+            } else {
+                // The hyperlink needs to link to the same thread. The page at the bottom need a #bottom fragment
+                $pages_top[] = "<a href=\"viewm.php?thread=" . $thr_id . "&page=". ($page_link["page"] - 1) . "\">" . $page_link["page"] . "</a>";
+                $pages_bottom[] = "<a href=\"viewm.php?thread=" . $thr_id . "&page=". ($page_link["page"] - 1) . "#bottom\">" . $page_link["page"] . "</a>";
+            }
+        }
+
+        // The top array is converted to a string and printed
+        // See below for the bottom array
+        echo implode(" ", $pages_top);
     }
     ?>
     </div>
@@ -293,9 +315,9 @@ if ($authorzation === true && !empty($_GET["thread"])) {
     </div>
     <div class="center_container">
         <?php
-        // This shows all the pages and highlights the current page.
+        // The bottom array is converted to a string and printed
         if (isset($messages_count)) {
-            echo display_pages($page, $messages_count, 15, $thr_id, true);
+            echo implode(" ", $pages_bottom);
         }
         ?>
     </div>

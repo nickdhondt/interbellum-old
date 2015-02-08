@@ -658,61 +658,108 @@ function count_all_messages($thr_id) {
     }
 }
 
-function display_pages($page, $items_count, $items_per_page, $thread_id, $bottom = false) {
+// Generates an array with the available pages. Also includes "..." if there is a gap between pages. (eg. 1 ... 7 8 9 10 11 12 13)
+function display_pages($page, $items_count, $items_per_page) {
+    // Calculate the total amount of pages based on the total amount of elements and the amount of elements on a page
     $pages = ceil($items_count / $items_per_page);
+
+    // This array will hold all the pages and other characters ("...", etc.)
     $output = array();
 
-    $go_to_bottom = "";
-
-    if ($bottom !== false) {
-        $go_to_bottom = "#bottom";
-    }
-
+    // These booleans indicate if there needs to be added a "..." at the end of the beginning of the array with pages
     $at_end = false;
     $at_begin = false;
 
+    // If there are 7 or less pages, this means there are no gaps between pages (1 ... 4 5)
+    // So the pages list can be a string of 7 or less pages
     if ($pages <= 7) {
         $start = 0;
         $end = $pages;
     } else {
+        // If there are more than 7 pages, this means there is a gap somewhere
+        // There are three scenarios:
+        // a) 1 2 3 4 5 6 7 ... 15
+        // b) 1 ... 3 4 5 6 7 8 9 ... 15
+        // c) 1 ... 12 13 14 15
         if ($page <= 3) {
+            // Scenario a
             $start = 0;
             $end = 7;
+            // Add the "...", but later (se below)
             $at_end = true;
         } elseif ($page > 3 && $page < $pages - 4) {
+            // Scenario b
             $start = $page - 3;
             $end = $page + 4;
+            // Add the "...", but later (se below)
             $at_begin = true;
             $at_end = true;
         } elseif($page >= $pages - 4) {
+            // Scenario c
             $start = $page - 3;
             $end = $pages;
+            // Add the "...", but later (se below)
             $at_begin = true;
         } else {
+            // Backup scenario
             $start = 0;
             $end = $pages;
         }
     }
 
+    $loop = 0;
+
+    // If there needs to be a "..." at the beginning of the pages list (scenario b and c) the first page is added and then the "..."
     if ($at_begin === true) {
-        $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=0" . $go_to_bottom . "\">1</a>";
-        $output[] = "...";
+        $output[$loop] = array(
+            // If set to true, this indicates that this is a page and should be a hyperlink
+            "href" => true,
+            "page" => 1
+        );
+        $loop++;
+
+        $output[$loop] = array(
+            // If set to false, this indicates that this is not a page and should not be a hyperlink
+            "href" => false,
+            "page" => "..."
+        );
+        $loop++;
     }
 
+    // A loop for the middle part of the pages list
     for ($i = $start; $i < $end; $i++) {
+        // If the page is active there is no need fo a hyperlink and the pagenumber is printed bold
         if ($page == $i) {
-            $output[] = "<strong>" . ($i + 1) . "</strong>";
+            $output[$loop] = array(
+                "href" => false,
+                "page" => "<strong>" . ($i + 1) . "</strong>"
+            );
         } else {
-            $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=" . $i . $go_to_bottom . "\">" . ($i + 1) . "</a>";
+            // The other pagenumbers need to be hyperlinks
+            $output[$loop] = array(
+                "href" => true,
+                "page" => $i + 1
+            );
         }
+        $loop++;
     }
 
+    // If there needs to be a "..." at the end of the pages list (scenario a and b) the "..." is added and then the last page
     if ($at_end === true) {
-        $output[] = "...";
-        $output[] = "<a href=\"viewm.php?thread=" . $thread_id . "&page=" . ($pages - 1) . $go_to_bottom . "\">" . $pages . "</a>";
+        $output[$loop] = array(
+            "href" => false,
+            "page" => "..."
+        );
+        $loop++;
+
+        $output[$loop] = array(
+            "href" => true,
+            "page" => $pages
+        );
     }
 
-    return implode(" ", $output);
+    // Return the array with pages
+    return $output;
 }
 
 function count_citys($user_id) {
