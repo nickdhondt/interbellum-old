@@ -7,6 +7,26 @@ require_once "../includes/functions.php";
 // This file checks a number of things (is the user logged in?, etc.) and fetches basic information (resourses in the current city, etc.)
 include "includes/management.php";
 
+//Smartform functionality
+    //1. Check for saved values.
+    if(!empty($_COOKIE["recipient"]))
+    {
+        $recipient = explode(",", sanitize($_COOKIE["recipient"]));
+        /* These values are children of "correctusers", but are rewritten to 'recipient' for the following reasons:
+            1. Security measure -> tampered coockies are bound to be re-checked.
+            2. Database Changes -> Changes to the database will be corrected.
+            3. Priority of current values -> 'recipients' will be overwritten by the current data */
+    }
+    if(!empty($_COOKIE["body"]))
+    {
+        $body = sanitize($_COOKIE["body"]);
+    }
+    if(!empty($_COOKIE["thread"]))
+    {
+        $thread = sanitize($_COOKIE["thread"]);
+    }
+
+//Declare the error array
 $errors = array();
 
 // The user must click the send button
@@ -33,12 +53,17 @@ if (isset($_POST["btn_send"])) {
             $errors[] = "Er zijn maximaal 20 ontvangers toegestaan";
         }
 
-        $wrongusers = array();
+        $wrongusers = array();  //Empty the array with the wrong users
+        $correctusers = array();    //Empty the array with correct users
         // We loop through all the potential recipients and put non existing recipients in an array
         foreach ($recipient as $potential_recipient) {
             $recipient_user_id = user_exists(trim($potential_recipient));
             if ($recipient_user_id === false) {
                 $wrongusers[] = $potential_recipient;
+            }
+            else
+            {
+                $correctusers[] = $potential_recipient;    //Fill the array with correct users
             }
         }
 
@@ -95,6 +120,23 @@ if (isset($_POST["btn_send"])) {
     }
 }
 
+//Smartform functionality
+    //2. Set the coockies with the data given.
+        //The values used by the smartform functionality have passed the if-structures on top of this page. Therefore, they don't need additional safety checks.
+    if(!empty($correctusers))
+    {
+        setcookie("recipient", implode(",", $correctusers));
+    }
+    if(!empty($body))
+    {
+        setcookie("body", $body);
+    }
+    if(!empty($thread))
+    {
+        setcookie("thread", $thread);
+    }
+
+//Show the form
 include "includes/pageparts/header.php";
 
 ?>
@@ -107,7 +149,9 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="post">
     <ul>
         <li>
-            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" />
+            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
+            if(!empty($correctusers)) echo implode(",", $correctusers);
+            ?>"/>
             <span class="info">
                 <img class="info" src="img/info_icon.svg" alt="info" />
                 <div>
@@ -116,10 +160,14 @@ output_errors($errors);
             </span>
         </li>
         <li>
-            <input type="text" name="txt_thread" placeholder="Onderwerp" />
+            <input type="text" name="txt_thread" placeholder="Onderwerp" value="<?php
+            if(!empty($thread)) echo $thread;
+            ?>"/>
         </li>
         <li>
-            <textarea name="txt_body" maxlength="1000" placeholder="Bericht"></textarea>
+            <textarea name="txt_body" maxlength="1000" placeholder="Bericht">
+                <?php if(!empty($body)) echo $body; ?>
+            </textarea>
         </li>
         <li>
             <input type="submit" name="btn_send" value="Verzenden" />

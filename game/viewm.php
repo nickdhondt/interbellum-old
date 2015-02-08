@@ -81,6 +81,13 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
     die();
 }
 
+/* //Smartform Functionality
+    //1. Gets the saved value of the previous entered reply.
+    if(!empty($_COOKIE["reply"]))
+    {
+        $reply = sanitize($_COOKIE["reply"]);
+    } */
+
 // The user must click the reply button to send a reply
 if (isset($_POST["btn_reply"])) {
     // There must also be a message, the body of the message can't be empty or just filled with spaces
@@ -120,6 +127,14 @@ if (isset($_POST["btn_reply"])) {
         $errors[] = "U moet een bericht invullen";
     }
 }
+
+/* //Smartform Functionality
+    //2. Set the coockies with the data given.
+        //The values used by the Smartform functionality have passed the if-structures on top of this page. Therefore, they don't need additional safety checks.
+if(!empty($reply))
+{
+    setcookie("reply", $reply);
+} */
 
 // A conversation is divided in parts of 15 messages (= a page)
 if (!empty($_GET["thread"]) && $authorzation !== false) {
@@ -248,11 +263,12 @@ if ($authorzation === true && !empty($_GET["thread"])) {
 // Errors are outputted
 output_errors($errors);
 
+
 ?>
 <form action="<?php echo $_SERVER["REQUEST_URI"] ?>#bottom" method="post">
     <ul>
         <li>
-            <textarea name="txt_reply" placeholder="Bericht" maxlength="1000" cols="70" rows="12"></textarea>
+            <textarea name="txt_reply" placeholder="Bericht" maxlength="1000" cols="70" rows="12"><?php /*if(!empty($reply)) echo $reply; */ ?></textarea>
         </li>
         <li>
             <input type="submit" name="btn_reply" value="Antwoorden" />
