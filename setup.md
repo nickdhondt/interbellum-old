@@ -21,3 +21,4 @@ A short guide on how to install and get started with interbellum.
 **Notes:**
 * `/game/password.php` is only accessible when a user is logged in (similar the most `/game` files). Only initially, when there aren't any users in the databse, this file can be opened when there is no one logged in.
 * If you try to log in and your password is incorrect. Make sure that you have not copied any spaces or returns to the password field when inserting a new user.
+* You can change the connection parameters in `/includes/database/connect.php`. Make sure the correct user, password and port are set.
