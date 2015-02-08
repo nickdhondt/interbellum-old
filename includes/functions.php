@@ -346,6 +346,35 @@ function make_thread_breadcrumbs($thr_id, $user_id, $status=0) {
     }
 }
 
+// Makes multiple breadcrumbs
+function mass_make_thread_breadcrumbs($thr_id, $users, $status = 0) {
+    global $connection;
+
+    // Set the current time
+    $time = time();
+
+    // Will contain an array with the value rows that will be inserted
+    $insert_values_array = array();
+
+    // Make a row for each user id and put it in the array
+    foreach ($users as $user_id) {
+        $insert_values_array[] = "('" . $thr_id . "', '" . $user_id . "', '" . $time . "', '" . $status . "')";
+    }
+
+    // Convert to a comma separated string
+    $insert_values = implode(", ", $insert_values_array);
+
+    // Insert the rows in the db
+    $sql_insert_breadcrumbs = mysqli_query($connection, "INSERT INTO thr_recipient (thr_id, user_id, last_mod, status) VALUES $insert_values");
+
+    // Return false if the query failed and true if it succeeded
+    if (!$sql_insert_breadcrumbs) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 // Select a users threads based on the breadcrumbs
 function get_thread_breadcrumbs($user_id) {
     global $connection;

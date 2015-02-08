@@ -34,11 +34,17 @@ if (isset($_POST["btn_send"])) {
         }
 
         $wrongusers = array();
+        $right_users_id = array();
         // We loop through all the potential recipients and put non existing recipients in an array
         foreach ($recipient as $potential_recipient) {
             $recipient_user_id = user_exists(trim($potential_recipient));
             if ($recipient_user_id === false) {
                 $wrongusers[] = $potential_recipient;
+            } else {
+                // The legit users id's are also put in an array. But not the sender, only the user recipients
+                if ($potential_recipient != $user_id) {
+                    $right_users_id[] = $recipient_user_id;
+                }
             }
         }
 
@@ -76,14 +82,10 @@ if (isset($_POST["btn_send"])) {
             // Make a link to the thread for the sender (a breadcrumb)
             // Note: the last parameter is 1, this means the thread is marked a read. But only for the sender, because at this point we only made a breadcrumb for the sender
             $new_thread_breadcrumb = make_thread_breadcrumbs($new_thread, $user_id, 1);
-            foreach ($recipient as $actual_recipient) {
-                // Now we make breadcrumbs for all other users
-                // Note: there is no third parameter specified in make_thread_breadcrumbs(). This is means it will automatically be set to 0, making the thread unread
-                $actual_recipient_id = user_exists(trim($actual_recipient));
-                if ($actual_recipient_id !== $user_id) {
-                    make_thread_breadcrumbs($new_thread, $actual_recipient_id);
-                }
-            }
+
+            // Now we make breadcrumbs for all other users
+            // Note: there is no third parameter specified in make_thread_breadcrumbs(). This is means it will automatically be set to 0, making the thread unread
+            $new_thread_breadcrumbs_others = mass_make_thread_breadcrumbs($new_thread, $right_users_id);
         }
 
         // If everything is made, we redirect the user the the conversation
