@@ -2,7 +2,7 @@
 A short guide on how to install and get started with interbellum.
 ##What you need
 * XAMPP (Apache, PHP 5.5, MySQL and phpMyAdmin)
-Or you can install another package or Apache, PHP, MySQL and phpMyAdmin (or alternative) individually.
+* You can install another package or Apache, PHP, MySQL and phpMyAdmin (or alternative) individually.
 
 ##Deploying interbellum
 1. Make sure you have a correctly installed server:
