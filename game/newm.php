@@ -7,25 +7,6 @@ require_once "../includes/functions.php";
 // This file checks a number of things (is the user logged in?, etc.) and fetches basic information (resourses in the current city, etc.)
 include "includes/management.php";
 
-//Smartform functionality
-    //1. Check for saved values.
-    if(!empty($_COOKIE["recipient"]))
-    {
-        $recipient = explode(",", sanitize($_COOKIE["recipient"]));
-        /* These values are children of "correctusers", but are rewritten to 'recipient' for the following reasons:
-            1. Security measure -> tampered coockies are bound to be re-checked.
-            2. Database Changes -> Changes to the database will be corrected.
-            3. Priority of current values -> 'recipients' will be overwritten by the current data */
-    }
-    if(!empty($_COOKIE["body"]))
-    {
-        $body = sanitize($_COOKIE["body"]);
-    }
-    if(!empty($_COOKIE["thread"]))
-    {
-        $thread = sanitize($_COOKIE["thread"]);
-    }
-
 //Declare the error array
 $errors = array();
 
@@ -119,22 +100,6 @@ if (isset($_POST["btn_send"])) {
         $errors[] = "U moet een gebruiker, onderwerp en een bericht invullen.";
     }
 }
-
-//Smartform functionality
-    //2. Set the coockies with the data given.
-        //The values used by the smartform functionality have passed the if-structures on top of this page. Therefore, they don't need additional safety checks.
-    if(!empty($correctusers))
-    {
-        setcookie("recipient", implode(",", $correctusers));
-    }
-    if(!empty($body))
-    {
-        setcookie("body", $body);
-    }
-    if(!empty($thread))
-    {
-        setcookie("thread", $thread);
-    }
 
 //Show the form
 include "includes/pageparts/header.php";

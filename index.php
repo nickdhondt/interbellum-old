@@ -149,6 +149,9 @@ include "includes/header.php";
 // Main content
 $user_logged_in = user_logged_in();
 
+//If the login succeeded, reset the attempts at the password to zero, as the current give password is correct.
+setcookie("attempts", "0");
+
 // Checking if the user is logged in
 // The user_logged_in() function also checks if the user has checked the "remember me" checkbox
 // Note: this method of remembering the user will be replaced with a better simpler system
