@@ -6,11 +6,64 @@
  *
  * get_buildings_game_info()
  * get_buildings_level_info()
- * ...
- *
- *
- *
- *
+ * calculate_speed_improvement()
+ * calculate_population_storage()
+ * calculate_cost()
+ * output_errors()
+ * user_exists()
+ * user_data()
+ * update_user()
+ * user_logged_in()
+ * get_session_data()
+ * get_session_hash()
+ * make_thread()
+ * make_message()
+ * make_thread_breadcrumbs()
+ * mass_make_thread_breadcrumbs()
+ * get_thread_breadcrumbs()
+ * get_thread_data()
+ * get_message_data()
+ * make_link_from_url()
+ * format_message()
+ * get_user_id_from_breadcrumbs§)
+ * sanitize()
+ * update_breadcrumb()
+ * prepare_fields()
+ * unread_messages()
+ * get_last_message()
+ * format_elapsed_seconds()
+ * thread_recipients()
+ * make_session()
+ * update_session()
+ * delete_breadcrumb()
+ * count_all_messages()
+ * display_pages()
+ * count_citys()
+ * create_city()
+ * coordinates_exist()
+ * create_building()
+ * get_citys()
+ * get_city_data()
+ * get_buildings_data()
+ * update_resources()
+ * calculate_resource_per_hour()
+ * calculate_storage_capacity()
+ * get_resource_task_timings()
+ * update_city()
+ * delete_completed_tasks()
+ * legal_building()
+ * buildings_next_level()
+ * create_task()
+ * get_task_time()
+ * calculate_building_time()
+ * upgrade_buildings()
+ * update_building()
+ * get_future_tasks()
+ * manage_single_city()
+ * html_page_title()
+ * mass_user_data()
+ * prepare_fields_select()
+ * count_all_users()
  *
  */
 
@@ -1437,7 +1490,7 @@ function mass_user_data($user_ids, $fields) {
     $user_ids_for_sql = implode(",", $user_ids);
 
     // Select the specified fields where the user id is in the range of the given id's the script requests
-    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id in ($user_ids_for_sql)");
+    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id IN ($user_ids_for_sql)");
 
     if (!$sql_get_data) {
         // Return error information if the query failed
@@ -1468,9 +1521,32 @@ function prepare_fields_select($fields) {
 function count_all_users() {
     global $connection;
 
+    // A sql statement that will count all the users
     $sql = mysqli_query($connection, "SELECT COUNT(id) FROM user");
 
     $all_users = mysqli_fetch_assoc($sql);
 
+    // Return the count
     return $all_users["COUNT(id)"];
+}
+
+function mass_update_breadcrumbs($thr_id, $user_ids, $fields) {
+    global $connection;
+
+    // We need the users in this format: user_id=1 OR user_id=2 etc.
+    $where_clause = "user_id=" . implode(" OR user_id=", $user_ids);
+
+    // Convert the array with fields to a string the MySQL db will understand
+    $values = prepare_fields($fields);
+
+    // Execute the query in thr_recipients
+    $sql_update_breadcrumbs = mysqli_query($connection, "UPDATE thr_recipient SET $values WHERE $where_clause AND thr_id=$thr_id");
+
+    // If the query failed, an error is returned
+    // If it succeeds, true is returned
+    if (!$sql_update_breadcrumbs) {
+        return mysqli_error($connection);
+    } else {
+        return true;
+    }
 }

@@ -34,15 +34,27 @@ if (!empty($_GET["thread"]) || !empty($_GET["delete"])) {
     // Deleted is set to true, it will be false if the user didn't delete the message
     // This is checked later in the script
     $deleted = true;
-    foreach ($all_members_id as $member_id) {
-        // Get the usernames of the members of this conversation
-        // Note: only the members who didn't delete the conversation
-        $fields = array("username");
-        $member_data = user_data($member_id["user_id"], $fields);
-        // Add the usernames to an array
-        $all_members_array[] = $member_data["username"];
-        // If the users id is present in the list of participant who didn't delete this message, the message is not deleted and the deleted variabel is set to false
-        if ($member_id["user_id"] === $user_id) {
+
+    // We will get these fields for all users who did not delete the conversation
+    $fields_for_deleted_check = array("id", "username");
+
+    // This array will hold the id of the users who did not delete the message
+    $members_not_del_ids = array();
+
+    // Filter the id out of an $all_members_id element and put it in a single dimensional array ($members_not_del_ids)
+    foreach ($all_members_id as $member_not_del) {
+        $members_not_del_ids[] = $member_not_del["user_id"];
+    }
+
+    // Select all the usernames and ids of the users who did not delete the message
+    $users_not_del = mass_user_data($members_not_del_ids, $fields_for_deleted_check);
+
+    // Loop through these users, save the username in the $all_members_array array and check if our user is in the list. If the user is, this means the user didn't delete the conversation and
+    // $deleted is set to false. The user can view the conversation (see below)
+    foreach($users_not_del as $not_deleted) {
+        $all_members_array[] = $not_deleted["username"];
+
+        if ($not_deleted["id"] == $user_id) {
             $deleted = false;
         }
     }
@@ -122,16 +134,22 @@ if (isset($_POST["btn_reply"])) {
                 $last_mod = time();
                 $send_fields = array("status" => 0, "last_mod" => $last_mod);
                 $send_own_fields = array("status" => 1, "last_mod" => $last_mod);
+
+                // This array will old all the recipients except the sender
+                $recipient_user_ids = array();
+
                 // Looping through all the users (including the ones who deleted the message)
-                // If the user id (in the session -> $user_id) is equal to the id found in the breadcrumbs, the breadcrumb is updated and the status is 1 (read by user)
-                // In the other case, the user id is not equal, the breadcrumb is also updated, but the status is 0 (not read)
+                // Filter all the recipients who are not the current user
                 foreach ($thread_breadcrumbs as $thr_user_id) {
-                    if ($thr_user_id["user_id"] !== $user_id) {
-                        update_breadcrumb($thr_id, $thr_user_id["user_id"], $send_fields);
-                    } else {
-                        update_breadcrumb($thr_id, $thr_user_id["user_id"], $send_own_fields);
+                    if ($thr_user_id["user_id"] != $user_id) {
+                        $recipient_user_ids[] = $thr_user_id["user_id"];
                     }
                 }
+
+                // Update the breadcrumb of the user (user has sent the message, it does not needs to be set to unread)
+                // For all the other users this needs to be set to unread, that is why there are other fields with status = 0
+                update_breadcrumb($thr_id, $user_id, $send_own_fields);
+                mass_update_breadcrumbs($thr_id, $recipient_user_ids, $send_fields);
             }
         }
     } else {
