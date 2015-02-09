@@ -130,9 +130,7 @@ output_errors($errors);
             ?>"/>
         </li>
         <li>
-            <textarea name="txt_body" maxlength="1000" placeholder="Bericht">
-                <?php if(!empty($body)) echo $body; ?>
-            </textarea>
+            <textarea name="txt_body" maxlength="1000" placeholder="Bericht"><?php if(!empty($body)) echo $body; ?></textarea>
         </li>
         <li>
             <input type="submit" name="btn_send" value="Verzenden" />
