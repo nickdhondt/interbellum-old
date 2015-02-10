@@ -114,7 +114,7 @@ a:active {
     margin: 10px 0 0 0;
     text-align: center;
     color: #000000;
-    z-index: 0;
+    z-index: 1;
 }
 
 nav {
@@ -127,7 +127,7 @@ nav {
     margin: 10px 0 0 0;
     text-align: center;
     color: #000000;
-    z-index: 1;
+    z-index: 2;
 }
 
 nav ul ul {
@@ -273,6 +273,18 @@ div.button div {
     padding: 8px;
 }
 
+div#read {
+    font-size: 0.7em;
+    color: #808080;
+    text-align: right;
+    float: right;
+}
+
+div#clear {
+    clear: both;
+}
+
+
 
 
 
@@ -368,6 +380,16 @@ div.container {
     margin-bottom: 10px;
 }
 
+div.center_container {
+    width: 578px;
+    border: 1px solid #808080;
+    padding: 10px;
+    background: #ffffff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+
 div.container:last-child {
     margin-bottom: 0;
 }
@@ -409,28 +431,28 @@ div.container section:last-child {
 
 
 
-span.info {
-    margin-left: 8px;
-    position: absolute;
-    padding: 3px 0;
+div.info {
+    display: inline-block;
+    position: relative;
 }
 
 img.info {
     height: 16px;
     width: 16px;
+    z-index: 0;
 }
 
-span.info div {
+div.info ~ div.info-hover {
     display: none;
     font-size: 0.8em;
     opacity: 0;
-    transition: opacity 0.3s;
+    margin-left: 10px;
 }
 
-span.info:hover div{
-    display: block;
+div.info:hover ~ div.info-hover{
+    display: inline-block;
     opacity: 1;
-    position: relative;
+    position: absolute;
     width: 300px;
     border: 1px solid #808080;
     background: #F5F5F5;

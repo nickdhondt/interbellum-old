@@ -34,6 +34,10 @@ if (isset($_POST["btn_send"])) {
             $errors[] = "Er zijn maximaal 20 ontvangers toegestaan";
         }
 
+<<<<<<< HEAD
+=======
+        $right_users_id = array();
+>>>>>>> origin/message-viewer-pa1.0
         $wrongusers = array();  //Empty the array with the wrong users
         $correctusers = array();    //Empty the array with correct users
         // We loop through all the potential recipients and put non existing recipients in an array
@@ -44,9 +48,17 @@ if (isset($_POST["btn_send"])) {
             }
             else
             {
+<<<<<<< HEAD
+=======
+                // The legit users id's are also put in an array. But not the sender, only the user recipients
+                if ($potential_recipient != $user_id) {
+                    $right_users_id[] = $recipient_user_id;
+                }
+>>>>>>> origin/message-viewer-pa1.0
                 $correctusers[] = $potential_recipient;    //Fill the array with correct users
             }
         }
+
 
         // If there are more than one wrong recipient, we want to put the last recipient in a different variable
         // This way we can make a correct sentence (see below)
@@ -82,14 +94,10 @@ if (isset($_POST["btn_send"])) {
             // Make a link to the thread for the sender (a breadcrumb)
             // Note: the last parameter is 1, this means the thread is marked a read. But only for the sender, because at this point we only made a breadcrumb for the sender
             $new_thread_breadcrumb = make_thread_breadcrumbs($new_thread, $user_id, 1);
-            foreach ($recipient as $actual_recipient) {
-                // Now we make breadcrumbs for all other users
-                // Note: there is no third parameter specified in make_thread_breadcrumbs(). This is means it will automatically be set to 0, making the thread unread
-                $actual_recipient_id = user_exists(trim($actual_recipient));
-                if ($actual_recipient_id !== $user_id) {
-                    make_thread_breadcrumbs($new_thread, $actual_recipient_id);
-                }
-            }
+
+            // Now we make breadcrumbs for all other users
+            // Note: there is no third parameter specified in make_thread_breadcrumbs(). This is means it will automatically be set to 0, making the thread unread
+            $new_thread_breadcrumbs_others = mass_make_thread_breadcrumbs($new_thread, $right_users_id);
         }
 
         // If everything is made, we redirect the user the the conversation
@@ -114,15 +122,20 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="post">
     <ul>
         <li>
+<<<<<<< HEAD
             <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
             if(!empty($correctusers)) echo implode(", ", $correctusers);
             ?>"/>
             <span class="info">
+=======
+            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" />
+            <div class="info">
+>>>>>>> origin/message-viewer-pa1.0
                 <img class="info" src="img/info_icon.svg" alt="info" />
-                <div>
-                    Plaats een komma tussen meerdere gebruikers. "gebruiker een, gebruiker twee, etc."
-                </div>
-            </span>
+            </div>
+            <div class="info-hover">
+                Plaats een komma tussen meerdere gebruikers. "gebruiker een, gebruiker twee, etc."
+            </div>
         </li>
         <li>
             <input type="text" name="txt_thread" placeholder="Onderwerp" value="<?php

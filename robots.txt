@@ -1,3 +1,7 @@
 User-agent: *
 Disallow: /game
+<<<<<<< HEAD
 Disallow: /projects
+=======
+Disallow: /projects
+>>>>>>> origin/message-viewer-pa1.0

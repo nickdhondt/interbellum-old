@@ -6,11 +6,66 @@
  *
  * get_buildings_game_info()
  * get_buildings_level_info()
- * ...
- *
- *
- *
- *
+ * calculate_speed_improvement()
+ * calculate_population_storage()
+ * calculate_cost()
+ * output_errors()
+ * user_exists()
+ * user_data()
+ * update_user()
+ * user_logged_in()
+ * get_session_data()
+ * get_session_hash()
+ * make_thread()
+ * make_message()
+ * make_thread_breadcrumbs()
+ * mass_make_thread_breadcrumbs()
+ * get_thread_breadcrumbs()
+ * get_thread_data()
+ * get_message_data()
+ * make_link_from_url()
+ * format_message()
+ * get_user_id_from_breadcrumbs§)
+ * sanitize()
+ * update_breadcrumb()
+ * prepare_fields()
+ * unread_messages()
+ * get_last_message()
+ * format_elapsed_seconds()
+ * thread_recipients()
+ * make_session()
+ * update_session()
+ * delete_breadcrumb()
+ * count_all_messages()
+ * display_pages()
+ * count_citys()
+ * create_city()
+ * coordinates_exist()
+ * create_building()
+ * get_citys()
+ * get_city_data()
+ * get_buildings_data()
+ * update_resources()
+ * calculate_resource_per_hour()
+ * calculate_storage_capacity()
+ * get_resource_task_timings()
+ * update_city()
+ * delete_completed_tasks()
+ * legal_building()
+ * buildings_next_level()
+ * create_task()
+ * get_task_time()
+ * calculate_building_time()
+ * upgrade_buildings()
+ * update_building()
+ * get_future_tasks()
+ * manage_single_city()
+ * html_page_title()
+ * mass_user_data()
+ * prepare_fields_select()
+ * count_all_users()
+ * mass_update_breadcrumbs()
+ * mass_get_thread_data()
  *
  */
 
@@ -346,6 +401,35 @@ function make_thread_breadcrumbs($thr_id, $user_id, $status=0) {
     }
 }
 
+// Makes multiple breadcrumbs
+function mass_make_thread_breadcrumbs($thr_id, $users, $status = 0) {
+    global $connection;
+
+    // Set the current time
+    $time = time();
+
+    // Will contain an array with the value rows that will be inserted
+    $insert_values_array = array();
+
+    // Make a row for each user id and put it in the array
+    foreach ($users as $user_id) {
+        $insert_values_array[] = "('" . $thr_id . "', '" . $user_id . "', '" . $time . "', '" . $status . "')";
+    }
+
+    // Convert to a comma separated string
+    $insert_values = implode(", ", $insert_values_array);
+
+    // Insert the rows in the db
+    $sql_insert_breadcrumbs = mysqli_query($connection, "INSERT INTO thr_recipient (thr_id, user_id, last_mod, status) VALUES $insert_values");
+
+    // Return false if the query failed and true if it succeeded
+    if (!$sql_insert_breadcrumbs) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 // Select a users threads based on the breadcrumbs
 function get_thread_breadcrumbs($user_id) {
     global $connection;
@@ -473,7 +557,7 @@ function get_user_id_from_breadcrumbs($thr_id) {
     $all_authorized_ids = array();
 
     // The users who are "authorized", who have a breadcrumb with specified thread is are selected
-    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id='$thr_id'");
+    $sql = mysqli_query($connection, "SELECT user_id, status FROM thr_recipient WHERE thr_id='$thr_id'");
 
     // Return an error or return the user id's
     if (!$sql) {
@@ -586,14 +670,18 @@ function format_elapsed_seconds ($seconds) {
 function thread_recipients ($thr_id) {
     global $connection;
 
-    $sql = mysqli_query($connection, "SELECT user_id FROM thr_recipient WHERE thr_id=$thr_id AND (status=0 OR status=1)");
+    $sql = mysqli_query($connection, "SELECT user_id, status FROM thr_recipient WHERE thr_id=$thr_id AND (status=0 OR status=1)");
 
     if (!$sql) {
         return mysqli_error($connection);
     } else {
         $all_recipients_id = array();
+        $loop = 0;
         while($recipient_id = mysqli_fetch_assoc($sql)) {
-            $all_recipients_id[] = $recipient_id["user_id"];
+            $all_recipients_id[$loop]["user_id"] = $recipient_id["user_id"];
+            $all_recipients_id[$loop]["status"] = $recipient_id["status"];
+
+            $loop++;
         }
         return $all_recipients_id;
     }
@@ -654,13 +742,107 @@ function count_all_messages($thr_id) {
     }
 }
 
+// Generates an array with the available pages. Also includes "..." if there is a gap between pages. (eg. 1 ... 7 8 9 10 11 12 13)
 function display_pages($page, $items_count, $items_per_page) {
+    // Calculate the total amount of pages based on the total amount of elements and the amount of elements on a page
     $pages = ceil($items_count / $items_per_page);
+
+    // This array will hold all the pages and other characters ("...", etc.)
     $output = array();
 
-    for ($i = 0; $i < $pages; $i++) {
-            $output[] = $i + 1;
+    // These booleans indicate if there needs to be added a "..." at the end of the beginning of the array with pages
+    $at_end = false;
+    $at_begin = false;
+
+    // If there are 7 or less pages, this means there are no gaps between pages (1 ... 4 5)
+    // So the pages list can be a string of 7 or less pages
+    if ($pages <= 7) {
+        $start = 0;
+        $end = $pages;
+    } else {
+        // If there are more than 7 pages, this means there is a gap somewhere
+        // There are three scenarios:
+        // a) 1 2 3 4 5 6 7 ... 15
+        // b) 1 ... 3 4 5 6 7 8 9 ... 15
+        // c) 1 ... 12 13 14 15
+        if ($page <= 3) {
+            // Scenario a
+            $start = 0;
+            $end = 7;
+            // Add the "...", but later (se below)
+            $at_end = true;
+        } elseif ($page > 3 && $page < $pages - 4) {
+            // Scenario b
+            $start = $page - 3;
+            $end = $page + 4;
+            // Add the "...", but later (se below)
+            $at_begin = true;
+            $at_end = true;
+        } elseif($page >= $pages - 4) {
+            // Scenario c
+            $start = $page - 3;
+            $end = $pages;
+            // Add the "...", but later (se below)
+            $at_begin = true;
+        } else {
+            // Backup scenario
+            $start = 0;
+            $end = $pages;
+        }
     }
+
+    $loop = 0;
+
+    // If there needs to be a "..." at the beginning of the pages list (scenario b and c) the first page is added and then the "..."
+    if ($at_begin === true) {
+        $output[$loop] = array(
+            // If set to true, this indicates that this is a page and should be a hyperlink
+            "href" => true,
+            "page" => 1
+        );
+        $loop++;
+
+        $output[$loop] = array(
+            // If set to false, this indicates that this is not a page and should not be a hyperlink
+            "href" => false,
+            "page" => "..."
+        );
+        $loop++;
+    }
+
+    // A loop for the middle part of the pages list
+    for ($i = $start; $i < $end; $i++) {
+        // If the page is active there is no need fo a hyperlink and the pagenumber is printed bold
+        if ($page == $i) {
+            $output[$loop] = array(
+                "href" => false,
+                "page" => "<strong>" . ($i + 1) . "</strong>"
+            );
+        } else {
+            // The other pagenumbers need to be hyperlinks
+            $output[$loop] = array(
+                "href" => true,
+                "page" => $i + 1
+            );
+        }
+        $loop++;
+    }
+
+    // If there needs to be a "..." at the end of the pages list (scenario a and b) the "..." is added and then the last page
+    if ($at_end === true) {
+        $output[$loop] = array(
+            "href" => false,
+            "page" => "..."
+        );
+        $loop++;
+
+        $output[$loop] = array(
+            "href" => true,
+            "page" => $pages
+        );
+    }
+
+    // Return the array with pages
     return $output;
 }
 
@@ -1310,7 +1492,11 @@ function mass_user_data($user_ids, $fields) {
     $user_ids_for_sql = implode(",", $user_ids);
 
     // Select the specified fields where the user id is in the range of the given id's the script requests
+<<<<<<< HEAD
     $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id in ($user_ids_for_sql)");
+=======
+    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id IN ($user_ids_for_sql)");
+>>>>>>> origin/message-viewer-pa1.0
 
     if (!$sql_get_data) {
         // Return error information if the query failed
@@ -1341,9 +1527,71 @@ function prepare_fields_select($fields) {
 function count_all_users() {
     global $connection;
 
+<<<<<<< HEAD
+=======
+    // A sql statement that will count all the users
+>>>>>>> origin/message-viewer-pa1.0
     $sql = mysqli_query($connection, "SELECT COUNT(id) FROM user");
 
     $all_users = mysqli_fetch_assoc($sql);
 
+<<<<<<< HEAD
     return $all_users["COUNT(id)"];
+=======
+    // Return the count
+    return $all_users["COUNT(id)"];
+}
+
+function mass_update_breadcrumbs($thr_id, $user_ids, $fields) {
+    global $connection;
+
+    // We need the users in this format: user_id=1 OR user_id=2 etc.
+    $where_clause = prepare_where_clause("user_id", $user_ids);
+
+    // Convert the array with fields to a string the MySQL db will understand
+    $values = prepare_fields($fields);
+
+    // Execute the query in thr_recipients
+    $sql_update_breadcrumbs = mysqli_query($connection, "UPDATE thr_recipient SET $values WHERE $where_clause AND thr_id=$thr_id");
+
+    // If the query failed, an error is returned
+    // If it succeeds, true is returned
+    if (!$sql_update_breadcrumbs) {
+        return mysqli_error($connection);
+    } else {
+        return true;
+    }
+}
+
+function mass_get_thread_data($thr_ids) {
+    global $connection;
+
+    // Format the data for the WHERE clause
+    $where_clause = prepare_where_clause("id", $thr_ids);
+
+    // Execute the SQL query
+    // Select the thread id and thread name for a series of threads (array $thr_ids)
+    $sql_thread_data = mysqli_query($connection, "SELECT id, thr_name FROM thread WHERE $where_clause");
+
+    if (!$sql_thread_data) {
+        // If the query fails, we return an error message
+        return mysqli_error($connection);
+    } else {
+        // This array will hold the thread data for all threads
+        $thr_names = array();
+
+        // Loop through the reaceived data and put in in the array
+        while($thr_data = mysqli_fetch_assoc($sql_thread_data)) {
+            $thr_names[] = array("id" => $thr_data["id"], "thr_name" => $thr_data["thr_name"]);
+        }
+
+        // Return the thread data for all asked threads
+        return $thr_names;
+    }
+}
+
+function prepare_where_clause($field, $values) {
+    // We format the data the WHERE clause will understand
+    return "(" . $field . "=" . implode(" OR " . $field . "=", $values) . ")";
+>>>>>>> origin/message-viewer-pa1.0
 }
