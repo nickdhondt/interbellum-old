@@ -1492,11 +1492,7 @@ function mass_user_data($user_ids, $fields) {
     $user_ids_for_sql = implode(",", $user_ids);
 
     // Select the specified fields where the user id is in the range of the given id's the script requests
-<<<<<<< HEAD
-    $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id in ($user_ids_for_sql)");
-=======
     $sql_get_data = mysqli_query($connection, "SELECT $sql_fields FROM user WHERE id IN ($user_ids_for_sql)");
->>>>>>> origin/message-viewer-pa1.0
 
     if (!$sql_get_data) {
         // Return error information if the query failed
@@ -1527,17 +1523,11 @@ function prepare_fields_select($fields) {
 function count_all_users() {
     global $connection;
 
-<<<<<<< HEAD
-=======
     // A sql statement that will count all the users
->>>>>>> origin/message-viewer-pa1.0
     $sql = mysqli_query($connection, "SELECT COUNT(id) FROM user");
 
     $all_users = mysqli_fetch_assoc($sql);
 
-<<<<<<< HEAD
-    return $all_users["COUNT(id)"];
-=======
     // Return the count
     return $all_users["COUNT(id)"];
 }
@@ -1593,5 +1583,4 @@ function mass_get_thread_data($thr_ids) {
 function prepare_where_clause($field, $values) {
     // We format the data the WHERE clause will understand
     return "(" . $field . "=" . implode(" OR " . $field . "=", $values) . ")";
->>>>>>> origin/message-viewer-pa1.0
 }

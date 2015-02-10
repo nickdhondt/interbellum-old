@@ -116,15 +116,10 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="post">
     <ul>
         <li>
-<<<<<<< HEAD
             <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
             if(!empty($correctusers)) echo implode(", ", $correctusers);
             ?>"/>
-            <span class="info">
-=======
-            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" />
             <div class="info">
->>>>>>> origin/message-viewer-pa1.0
                 <img class="info" src="img/info_icon.svg" alt="info" />
             </div>
             <div class="info-hover">
