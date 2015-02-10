@@ -64,6 +64,8 @@
  * mass_user_data()
  * prepare_fields_select()
  * count_all_users()
+ * mass_update_breadcrumbs()
+ * mass_get_thread_data()
  *
  */
 
@@ -1534,7 +1536,7 @@ function mass_update_breadcrumbs($thr_id, $user_ids, $fields) {
     global $connection;
 
     // We need the users in this format: user_id=1 OR user_id=2 etc.
-    $where_clause = "user_id=" . implode(" OR user_id=", $user_ids);
+    $where_clause = prepare_where_clause("user_id", $user_ids);
 
     // Convert the array with fields to a string the MySQL db will understand
     $values = prepare_fields($fields);
@@ -1549,4 +1551,36 @@ function mass_update_breadcrumbs($thr_id, $user_ids, $fields) {
     } else {
         return true;
     }
+}
+
+function mass_get_thread_data($thr_ids) {
+    global $connection;
+
+    // Format the data for the WHERE clause
+    $where_clause = prepare_where_clause("id", $thr_ids);
+
+    // Execute the SQL query
+    // Select the thread id and thread name for a series of threads (array $thr_ids)
+    $sql_thread_data = mysqli_query($connection, "SELECT id, thr_name FROM thread WHERE $where_clause");
+
+    if (!$sql_thread_data) {
+        // If the query fails, we return an error message
+        return mysqli_error($connection);
+    } else {
+        // This array will hold the thread data for all threads
+        $thr_names = array();
+
+        // Loop through the reaceived data and put in in the array
+        while($thr_data = mysqli_fetch_assoc($sql_thread_data)) {
+            $thr_names[] = array("id" => $thr_data["id"], "thr_name" => $thr_data["thr_name"]);
+        }
+
+        // Return the thread data for all asked threads
+        return $thr_names;
+    }
+}
+
+function prepare_where_clause($field, $values) {
+    // We format the data the WHERE clause will understand
+    return "(" . $field . "=" . implode(" OR " . $field . "=", $values) . ")";
 }
