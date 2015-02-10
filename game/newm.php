@@ -7,6 +7,7 @@ require_once "../includes/functions.php";
 // This file checks a number of things (is the user logged in?, etc.) and fetches basic information (resourses in the current city, etc.)
 include "includes/management.php";
 
+//Declare the error array
 $errors = array();
 
 // The user must click the send button
@@ -33,12 +34,17 @@ if (isset($_POST["btn_send"])) {
             $errors[] = "Er zijn maximaal 20 ontvangers toegestaan";
         }
 
-        $wrongusers = array();
+        $wrongusers = array();  //Empty the array with the wrong users
+        $correctusers = array();    //Empty the array with correct users
         // We loop through all the potential recipients and put non existing recipients in an array
         foreach ($recipient as $potential_recipient) {
             $recipient_user_id = user_exists(trim($potential_recipient));
             if ($recipient_user_id === false) {
                 $wrongusers[] = $potential_recipient;
+            }
+            else
+            {
+                $correctusers[] = $potential_recipient;    //Fill the array with correct users
             }
         }
 
@@ -57,7 +63,7 @@ if (isset($_POST["btn_send"])) {
             // We add a different error message based on the amount of wrong recipients. Either 1 or more.
             // If $last_wrong_user is empty, this means there is only one wrong recipient (see above)
             if (empty($last_wrong_user)) {
-                $errors[] = "De gebruiker " . $wrongusers[0] . " bstaat niet";
+                $errors[] = "De gebruiker " . $wrongusers[0] . " bestaat niet";
             } else {
                 $allwrongusers = implode(", ", $wrongusers);
                 $errors[] = "De gebruikers " . $allwrongusers . " en " . $last_wrong_user . " bestaan niet";
@@ -95,6 +101,7 @@ if (isset($_POST["btn_send"])) {
     }
 }
 
+//Show the form
 include "includes/pageparts/header.php";
 
 ?>
@@ -107,7 +114,9 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="post">
     <ul>
         <li>
-            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" />
+            <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
+            if(!empty($correctusers)) echo implode(", ", $correctusers);
+            ?>"/>
             <span class="info">
                 <img class="info" src="img/info_icon.svg" alt="info" />
                 <div>
@@ -116,10 +125,12 @@ output_errors($errors);
             </span>
         </li>
         <li>
-            <input type="text" name="txt_thread" placeholder="Onderwerp" />
+            <input type="text" name="txt_thread" placeholder="Onderwerp" value="<?php
+            if(!empty($thread)) echo $thread;
+            ?>"/>
         </li>
         <li>
-            <textarea name="txt_body" maxlength="1000" placeholder="Bericht"></textarea>
+            <textarea name="txt_body" maxlength="1000" placeholder="Bericht"><?php if(!empty($body)) echo $body; ?></textarea>
         </li>
         <li>
             <input type="submit" name="btn_send" value="Verzenden" />

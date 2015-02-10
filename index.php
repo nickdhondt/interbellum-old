@@ -6,6 +6,21 @@ require_once "includes/functions.php";
 // Declare an empty errors array
 $errors = array();
 
+//Smartform Functionality
+    //1. Get, if present, the saved coockie data.
+    if(!empty($_COOKIE["username"]))
+    {
+        $username = sanitize($_COOKIE["username"]);
+    }
+    if(!empty($_COOKIE["password"]))
+    {
+        $password = sanitize(base64_decode($_COOKIE["password"]));  //See note on the setcoockie of this element.
+    }
+    if(!empty($_COOKIE["remember_me"]))
+    {
+        $remember_me_checkstate = sanitize($_COOKIE["remember_me"]);
+    }
+
 // Check is the "login" button has been clicked
 if (!empty($_POST["btn_login"])) {
     // If the user hasn't entered a username, an error will be added to the errors array
@@ -14,6 +29,7 @@ if (!empty($_POST["btn_login"])) {
         $username = $_POST["txt_username"];
     } else {
         $errors[] = "Vul uw gebruikersnaam in";
+        $username = "";
     }
 
     // If the user hasn't entered a password, an error will be added to the errors array
@@ -22,6 +38,17 @@ if (!empty($_POST["btn_login"])) {
         $password = $_POST["txt_password"];
     } else {
         $errors[] = "Vul uw wachtwoord in";
+        $password = "";
+    }
+
+    //Get the checkstate of the "remember_me" checkbox
+    if (!empty($_POST["chk_remember"]) && $_POST["chk_remember"] === "remember_check")
+    {
+        $remember_me_checkstate = "checked";
+    }
+    else
+    {
+        $remember_me_checkstate = "";
     }
 
     // If the script hasn't generated errors, the entered username and password will be checked
@@ -33,7 +60,7 @@ if (!empty($_POST["btn_login"])) {
         if ($user_id === false) {
             $errors[] = "Gebruiker niet gevonden";
         } else {
-            // the fields array detemines which fields need to be requested to the database
+            // the fields array determines which fields need to be requested to the database
             // user_data will request these fields an return an array with the data (or an error)
             $fields = array("username", "password");
             $user_data = user_data($user_id, $fields);
@@ -41,11 +68,12 @@ if (!empty($_POST["btn_login"])) {
             // the hashed password are compared
             if (password_verify($password, $user_data["password"]) === true) {
                 // If this check succeeded the user is logged in by putting his user id in a session
-                // Note: the is no session_start() function on this page, this funtion is included in the functions.php file (see top of this file)
+                // Note: the is no session_start() function on this page, this function is included in the functions.php file (see top of this file)
                 $_SESSION["user_id"] = $user_id;
                 // "remember me" checkbox
                 // Note: this method of remembering the user will be replaced with a better simpler system
-                if (isset($_POST["chk_remember"]) && $_POST["chk_remember"] === "remember_check") {
+                if ($remember_me_checkstate == "checked")
+                {
                     $remember_hash = hash("sha512", rand() . $username);
                     if (!empty($_COOKIE["remember_me_id"])) {
                         $session_id = $_COOKIE["remember_me_id"];
@@ -68,16 +96,66 @@ if (!empty($_POST["btn_login"])) {
     }
 }
 
+//Smartform functionality
+    //2. Enter the given values in a coockie.
+        //The values used by the smartform functionality have passed the if-structures on top of this page. Therefore, they don't need additional safety checks.
+    if(!empty($username))   //If an username was given, remember it.
+    {
+        setcookie("username", $username);
+    }
+    else
+    {
+        setcookie("username", "");  //In case the user left this blank, the previous value ought to be deleted.
+    }
+    if(!empty($password))   //If a password was given, remember it.
+    {
+        setcookie("password", base64_encode($password));        //NOTE: base64 isn't effective, as everyone can decode it. We could work with a database reference instead.
+        //As for a safety measure, only allow this functionality for 3 times in a row.
+        if(isset($_COOKIE["attempts"]))
+        {
+            $attempts = intval($_COOKIE["attempts"]);
+            if($attempts < 2)   //The user gets 3 attempts.
+            {
+                setcookie("attempts", $attempts + 1);
+            }
+            else    //After 3 attempts, the password isn't remembered anymore.
+            {
+                setcookie("attempts", "0");
+                setcookie("password","");
+                $password = "";
+            }
+        }
+        else
+        {
+            setcookie("attempts", "0");
+        }
+    }
+    else
+    {
+        setcookie("password", "");      //In case the user left this blank, the previous value ought to be deleted.
+    }
+    if(!empty($remember_me_checkstate))    //If the remember_me checkbox was checked, remember it.
+    {
+        setcookie("remember_me", $remember_me_checkstate);
+    }
+    else
+    {
+        setcookie("remember_me", "");    //In case the user didn't check this, the previous value ought to be deleted.
+    }
+
 // Page header (including html head, etc)
 include "includes/header.php";
 
 // Main content
 $user_logged_in = user_logged_in();
 
+//If the login succeeded, reset the attempts at the password to zero, as the current give password is correct.
+setcookie("attempts", "0");
+
 // Checking if the user is logged in
 // The user_logged_in() function also checks if the user has checked the "remember me" checkbox
 // Note: this method of remembering the user will be replaced with a better simpler system
-if ($user_logged_in === false) {
+if ($user_logged_in ===  false) {
     // If the user is not logged in, the login form is shown
     // The loginform.php file also deals with possible errors (output_errors() function)
     include "includes/loginform.php";

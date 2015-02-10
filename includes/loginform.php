@@ -8,13 +8,20 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["PHP_SELF"] ?>" method="post">
     <ul>
         <li>
-            <input type="text"  name="txt_username" placeholder="Gebruikersnaam"  />
+            <input type="text"  name="txt_username" placeholder="Gebruikersnaam" value="<?php
+            if(!empty($username)) echo $username;
+            ?>"/>
         </li>
         <li>
-            <input type="password" name="txt_password" placeholder="Wachtwoord"  />
+            <input type="password" name="txt_password" placeholder="Wachtwoord" value="<?php
+            if(!empty($password)) echo $password;
+            ?>" />
         </li>
         <li>
-            <input type="checkbox" name="chk_remember" id="remember" value="remember_check" />
+            <input type="checkbox" name="chk_remember" id="remember" value="remember_check"
+                <?php
+                if(!empty($remember_me_checkstate)) echo $remember_me_checkstate;
+                ?>/>
             <label for="remember" >Wachtwoord onthouden</label>
         </li>
         <li>
