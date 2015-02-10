@@ -33,20 +33,25 @@ if (isset($_POST["btn_send"])) {
             $errors[] = "Er zijn maximaal 20 ontvangers toegestaan";
         }
 
-        $wrongusers = array();
         $right_users_id = array();
+        $wrongusers = array();  //Empty the array with the wrong users
+        $correctusers = array();    //Empty the array with correct users
         // We loop through all the potential recipients and put non existing recipients in an array
         foreach ($recipient as $potential_recipient) {
             $recipient_user_id = user_exists(trim($potential_recipient));
             if ($recipient_user_id === false) {
                 $wrongusers[] = $potential_recipient;
-            } else {
+            }
+            else
+            {
                 // The legit users id's are also put in an array. But not the sender, only the user recipients
                 if ($potential_recipient != $user_id) {
                     $right_users_id[] = $recipient_user_id;
                 }
+                $correctusers[] = $potential_recipient;    //Fill the array with correct users
             }
         }
+
 
         // If there are more than one wrong recipient, we want to put the last recipient in a different variable
         // This way we can make a correct sentence (see below)
