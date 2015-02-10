@@ -34,10 +34,7 @@ if (isset($_POST["btn_send"])) {
             $errors[] = "Er zijn maximaal 20 ontvangers toegestaan";
         }
 
-<<<<<<< HEAD
-=======
         $right_users_id = array();
->>>>>>> origin/message-viewer-pa1.0
         $wrongusers = array();  //Empty the array with the wrong users
         $correctusers = array();    //Empty the array with correct users
         // We loop through all the potential recipients and put non existing recipients in an array
@@ -48,13 +45,10 @@ if (isset($_POST["btn_send"])) {
             }
             else
             {
-<<<<<<< HEAD
-=======
                 // The legit users id's are also put in an array. But not the sender, only the user recipients
                 if ($potential_recipient != $user_id) {
                     $right_users_id[] = $recipient_user_id;
                 }
->>>>>>> origin/message-viewer-pa1.0
                 $correctusers[] = $potential_recipient;    //Fill the array with correct users
             }
         }
