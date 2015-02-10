@@ -115,7 +115,7 @@ output_errors($errors);
     <ul>
         <li>
             <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
-            if(!empty($correctusers)) echo implode(",", $correctusers);
+            if(!empty($correctusers)) echo implode(", ", $correctusers);
             ?>"/>
             <span class="info">
                 <img class="info" src="img/info_icon.svg" alt="info" />
