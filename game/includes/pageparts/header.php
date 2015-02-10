@@ -9,6 +9,7 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
 <head>
     <meta charset="UTF-8">
     <title><?php echo $title ?></title>
+    <link rel="icon" href="../img/favicon.png" type="image/png">
     <link rel="stylesheet" type="text/css" href="css/game.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
