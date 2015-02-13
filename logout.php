@@ -8,9 +8,12 @@ session_unset();
 session_destroy();
 
 // Clearing the remember me cookies
-// Note: this method of remembering the user will be replaced with a better simpler system
-setcookie("remember_me_hash", "", time()-3600);
-setcookie("remember_me_id", "", time()-3600);
+setcookie("-int-remember_me_hash", "", time()-3600);
+setcookie("-int-remember_my_name", "", time()-3600);
+
+// Clearing the "smartfrom" cookies. These should have been deleted already. Just to be sure.
+setcookie("-int-remember_me", "", time() - 3600);
+setcookie("-int-username", "", time() - 3600);
 
 // Redirecting the user back to the index page
 header ("Refresh: 2; url=\"index.php\"");
