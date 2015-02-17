@@ -287,16 +287,20 @@ function user_logged_in () {
     // If there isn't a user id, false is returned
     if (!empty($_SESSION["user_id"])) {
         return $_SESSION["user_id"];
-    } elseif (!empty($_COOKIE["remember_me_id"]) && !empty($_COOKIE["remember_me_hash"])) {
-        // Doesn't work correctly, needs fix
-        $cookie_id = $_COOKIE["remember_me_id"];
-        $cookie_hash = $_COOKIE["remember_me_hash"];
-        $session_hash = get_session_hash($cookie_id);
-        if ($session_hash !== false && $session_hash === $cookie_hash) {
-            $session_fields = array("user_id");
-            $session_data = get_session_data($cookie_id, $session_fields);
-            $_SESSION["user_id"] = $session_data["user_id"];
-            return $session_data["user_id"];
+    } elseif (!empty($_COOKIE["-int-remember_my_name"]) && !empty($_COOKIE["-int-remember_me_hash"])) {
+        // If the remember me cookies are set. Their values are saved in a variable
+        $cookie_user_id = $_COOKIE["-int-remember_my_name"];
+        $cookie_hash = $_COOKIE["-int-remember_me_hash"];
+
+        // Get the saved hash from the db
+        $remember_fields = array("remember_hash");
+        $user_hash_data = user_data($cookie_user_id, $remember_fields);
+
+        // If the hash in the cookie and the hash in the db are equal, The user id is saved in session
+        if ($user_hash_data["remember_hash"] == $cookie_hash) {
+            $_SESSION["user_id"] = $cookie_user_id;
+            // return the user id
+            return $_SESSION["user_id"];
         } else {
             return false;
         }
