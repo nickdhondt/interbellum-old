@@ -61,6 +61,7 @@
  * get_future_tasks()
  * manage_single_city()
  * html_page_title()
+ * get_array_name_from_page()
  * mass_user_data()
  * prepare_fields_select()
  * count_all_users()
@@ -1489,6 +1490,52 @@ function html_page_title($filename) {
 
     // Return the title
     return $title;
+}
+
+function get_array_name_from_page($override_name = "")
+{
+    //This function returns the name of the array used to get the information about the current page.
+    //A user can override the fact that this function checks for the current page by
+        //entering another name to check.
+    if(!empty($override_name))
+    {
+        $current_page_name = $override_name;
+    } else {
+        $current_page_name = basename($_SERVER["SCRIPT_NAME"]);
+    }
+
+    switch($current_page_name)
+    {
+        case "bsteel.php":
+            $building = "steel_factory";
+            $resource = "staal/uur";
+            break;
+        case "bcoal.php";
+            $building = "coal_mine";
+            $resource = "kool/uur";
+            break;
+        case "bwood.php";
+            $building = "woodchopper";
+            $resource = "hout/uur";
+            break;
+        case "bstorage.php";
+            $building = "storage";
+            $resource = "opslagruimte";
+            break;
+        case "bkitchen.php";
+            $building = "kitchen";
+            $resource = "inwoners";
+            break;
+        case "bhead.php";
+            $building = "headquarters";
+            $resource = "verdragen";
+            break;
+        default:
+            $building = false;
+            $resource = false;
+            break;
+    }
+    return $building.';'.$resource;
 }
 
 function mass_user_data($user_ids, $fields) {

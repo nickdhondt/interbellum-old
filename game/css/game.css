@@ -13,10 +13,16 @@ h1 {
 h2 {
     font-size: 1.2em;
     margin-bottom: 0;
+    margin-top: 0;
 }
 
 h2 + p {
     margin-top: 0;
+}
+
+p {
+    margin-bottom: 1em;
+    margin-left: 0.6em;
 }
 
 footer div:first-of-type {
@@ -435,10 +441,6 @@ section.othermessage {
 div.container section:last-child {
     margin-bottom: 0;
 }
-
-
-
-
 
 div.info {
     display: inline-block;
