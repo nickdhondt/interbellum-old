@@ -945,7 +945,12 @@ function get_buildings_data($city_id, $fields) {
     global $connection;
 
     if (!empty ($fields)) {
-        $sql_fields = implode(", ", $fields);
+        if(is_array($fields))
+        {
+            $sql_fields = implode(", ", $fields);
+        } else {
+            $sql_fields = $fields;
+        }
     } else {
         $sql_fields = "*";
     }

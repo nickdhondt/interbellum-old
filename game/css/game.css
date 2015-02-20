@@ -10,6 +10,15 @@ h1 {
     margin-top: 0;
 }
 
+h2 {
+    font-size: 1.2em;
+    margin-bottom: 0;
+}
+
+h2 + p {
+    margin-top: 0;
+}
+
 footer div:first-of-type {
     font-size: 0.65em;
     color: #b7b7b7;
@@ -458,4 +467,11 @@ div.info:hover ~ div.info-hover{
     background: #F5F5F5;
     padding: 8px;
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+ul.show_resources li {
+    list-style-type: none;
+    float:left;
+    padding-right: 0.6em;
+    padding-left: 0.6em;
 }
