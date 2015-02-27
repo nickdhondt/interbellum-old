@@ -55,6 +55,6 @@ if(($building != false) && ($resource != false)){
         if($type == "stock") $next_level_resources_per_hour = calculate_storage_capacity($level_info[$base_factor], $next_level, $level_info[$constant_factor]);
         $next_level_cost = calculate_cost($level_info["base_steel_cost"], $level_info["base_coal_cost"], $level_info["base_wood_cost"], $next_level, $level_info["cost_constant"]);
     } else {
-        if($max_level > $current_level) $maxed_out = true;
+        if($current_level >= $max_level) $maxed_out = true;
     }
 }
