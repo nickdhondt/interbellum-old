@@ -67,6 +67,8 @@
  * count_all_users()
  * mass_update_breadcrumbs()
  * mass_get_thread_data()
+ * prepare_where_clause()
+ * format_time()
  *
  */
 
@@ -186,7 +188,9 @@ function get_building_level_info() {
 
 // Calculates the building speed improvement when upgrading buildings
 // The returned double is between 0 and 1, so by multiplying the building time (in seconds) with this coefficient you get a smeller building time
-function calculate_speed_improvement($level, $constant, $current_building_seconds) {
+function calculate_speed_improvement($level, $current_building_seconds) {
+    $level_info = get_building_level_info();
+    $constant = $level_info["headquarters"]["building_speed_constant"];
     return (pow($constant, $level) * $current_building_seconds);
 }
 
@@ -198,9 +202,9 @@ function calculate_population_storage($base, $level, $constant) {
 // Calculates the costs of all resources and returns an array with the calculated values
 function calculate_cost($steel, $coal, $wood, $level, $cost_constant) {
     $cost = array();
-    $cost["steel"] = round(($level * $level * $level) * $cost_constant) + $steel;
-    $cost["coal"] = round(($level * $level * $level) * $cost_constant) + $coal;
-    $cost["wood"] = round(($level * $level * $level) * $cost_constant) + $wood;
+    $cost["steel"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($steel * ($level * $level) / 2));
+    $cost["coal"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($coal * ($level * $level) / 2));
+    $cost["wood"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($wood * ($level * $level) / 2));
 
     return $cost;
 }
@@ -209,7 +213,7 @@ function calculate_cost($steel, $coal, $wood, $level, $cost_constant) {
 function output_errors($errors) {
     // Check if the array contains elements
     if (!empty($errors)) {
-        echo "<ul>";
+        echo "<ul class=\"errors\">";
         // Loop through the elements and puts them in a list
         foreach($errors as $error) {
             echo "<li>" . $error . "</li>";
@@ -658,6 +662,8 @@ function get_last_message ($thr_id) {
     }
 }
 
+// Format the elapsed time
+// Exemples: 16m, 5h, 12d, etc
 function format_elapsed_seconds ($seconds) {
     if ($seconds <= 3540 && $seconds >= 0) {
         return ceil($seconds/60) . "m";
@@ -668,10 +674,11 @@ function format_elapsed_seconds ($seconds) {
     } elseif ($seconds > 2678399) {
         return "+31d";
     } else {
-        return "?";
+        return "?d";
     }
 }
 
+// 
 function thread_recipients ($thr_id) {
     global $connection;
 
@@ -942,7 +949,7 @@ function get_city_data($city_id, $fields) {
     }
 }
 
-function get_buildings_data($city_id, $fields) {
+    function get_buildings_data($city_id, $fields) {
     global $connection;
 
     if (!empty ($fields)) {
@@ -992,9 +999,22 @@ function update_resources($city_id) {
     if (!empty($task_data["storage"])) {
         $storage_upgrades = count($task_data["storage"]);
     } else {
+        //$task_data["storage"] = array("upgrade" => 0);
         $storage_upgrades = 0;
     }
+    /*
+        foreach ($task_data["storage"] as $storage_data) {
+            if ($storage_data === 0) {
 
+            } else {
+                if ($storage_data["building"] === "storage") {
+
+                }
+            }
+
+            print_r($storage_data);
+        }
+    */
     if ($storage_upgrades === 0) {
         if ($deserved_steel <= $storage_capacity) {
             if (!empty($task_data["steel_factory"])) {
@@ -1109,6 +1129,8 @@ function update_resources($city_id) {
         }
     } else {
         foreach ($task_data["storage"] as $storage_data) {
+            $storage_capacity = round(calculate_storage_capacity($building_info["storage"]["base_capacity"], $storage_data["level"], $building_info["storage"]["capacity_constant"]));
+
             if ($deserved_steel <= $storage_capacity) {
                 if (!empty($task_data["steel_factory"])) {
                     $steel_factory_upgrades = count($task_data["steel_factory"]);
@@ -1118,7 +1140,7 @@ function update_resources($city_id) {
 
                 if ($steel_factory_upgrades === 0) {
                     $steel_factory_level = $buildings_data["steel_factory"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = time() - $storage_data["update_time"];
                     if ($steel_factory_level > 0) {
                         $steel_per_hour = calculate_resource_per_hour($building_info["steel_factory"]["base_gain"], $steel_factory_level, $building_info["steel_factory"]["resource_constant"]);
                     } else {
@@ -1155,7 +1177,7 @@ function update_resources($city_id) {
 
                 if ($coal_mine_upgrades === 0) {
                     $coal_mine_level = $buildings_data["coal_mine"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = time() - $storage_data["update_time"];
                     if ($coal_mine_level > 0) {
                         $coal_per_hour = calculate_resource_per_hour($building_info["coal_mine"]["base_gain"], $coal_mine_level, $building_info["coal_mine"]["resource_constant"]);
                     } else {
@@ -1193,7 +1215,7 @@ function update_resources($city_id) {
 
                 if ($woodchopper_upgrades === 0) {
                     $woodchopper_level = $buildings_data["woodchopper"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = time() - $storage_data["update_time"];
                     if ($woodchopper_level > 0) {
                         $wood_per_hour = calculate_resource_per_hour($building_info["woodchopper"]["base_gain"], $woodchopper_level, $building_info["woodchopper"]["resource_constant"]);
                     } else {
@@ -1357,15 +1379,15 @@ function buildings_next_level($city_id) {
     }
 }
 
-function create_task($city_id, $building, $level, $time_constant) {
+function create_task($city_id, $building, $level, $time_constant, $headquarters_level) {
     global $connection;
 
     $start_time = get_task_time($city_id);
 
     if (!empty($start_time)) {
-        $building_time = (int)$start_time + calculate_building_time($level, $time_constant);
+        $building_time = (int)$start_time + calculate_building_time($level, $time_constant, $headquarters_level);
     } else {
-        $building_time = time() + calculate_building_time($level, $time_constant);
+        $building_time = time() + calculate_building_time($level, $time_constant, $headquarters_level);
     }
 
     if (mysqli_query($connection, "INSERT INTO task (city_id, building, level, update_time) VALUES ($city_id, '$building', $level, $building_time)")) {
@@ -1388,8 +1410,10 @@ function get_task_time($city_id) {
     }
 }
 
-function calculate_building_time($level, $constant) {
-    return 30 + (($level * $level * $level) * $constant);
+function calculate_building_time($level, $constant, $headquarters_level) {
+    $level_info = get_building_level_info();
+
+    return 30 + (($level * $level * $level) * $constant) * calculate_speed_improvement($headquarters_level, $level_info["headquarters"]["building_speed_constant"]);
 }
 
 function upgrade_buildings($city_id) {
@@ -1407,7 +1431,7 @@ function upgrade_buildings($city_id) {
             $fields[$completed_task["building"]] = $completed_task["level"];
         }
         if (!empty($fields)) {
-            echo update_building($city_id, $fields);
+            update_building($city_id, $fields);
         }
         return true;
     }
@@ -1639,4 +1663,12 @@ function mass_get_thread_data($thr_ids) {
 function prepare_where_clause($field, $values) {
     // We format the data the WHERE clause will understand
     return "(" . $field . "=" . implode(" OR " . $field . "=", $values) . ")";
+}
+
+function format_time($seconds) {
+    $hours = floor($seconds / 3600);
+    $mins = floor(($seconds - ($hours*3600)) / 60);
+    $secs = floor($seconds % 60);
+
+    return $hours . ":" . sprintf("%02d", $mins) . ":" . sprintf("%02d", $secs);
 }
