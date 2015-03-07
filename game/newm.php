@@ -13,11 +13,11 @@ $errors = array();
 // The user must click the send button
 if (isset($_POST["btn_send"])) {
     // All fields are required, none can be empty
+    $body = $_POST["txt_body"];
+    $thread = $_POST["txt_thread"];
     if (!empty($_POST["txt_recipient"]) && !empty(trim($_POST["txt_body"])) && !empty($_POST["txt_thread"])) {
         // If the sender wants to send to multiple recipients, the recipients are put in an array
         $recipient = explode(",", $_POST["txt_recipient"]);
-        $body = $_POST["txt_body"];
-        $thread = $_POST["txt_thread"];
 
         // The body cannot be longer than 1000 characters
         if (strlen($body) > 1000) {
@@ -49,7 +49,7 @@ if (isset($_POST["btn_send"])) {
                 if ($potential_recipient != $user_id) {
                     $right_users_id[] = $recipient_user_id;
                 }
-                $correctusers[] = $potential_recipient;    //Fill the array with correct users
+                $correctusers[] = trim($potential_recipient);    //Fill the array with correct users
             }
         }
 
@@ -117,8 +117,8 @@ output_errors($errors);
     <ul>
         <li>
             <input type="text" name="txt_recipient" placeholder="Ontvanger(s)" value="<?php
-            if(!empty($correctusers)) echo implode(", ", $correctusers);
-            ?>"/>
+            if(!empty($correctusers)) echo trim(implode(", ", $correctusers));
+            ?>" required="" />
             <div class="info">
                 <img class="info" src="img/info_icon.svg" alt="info" />
             </div>
@@ -129,10 +129,10 @@ output_errors($errors);
         <li>
             <input type="text" name="txt_thread" placeholder="Onderwerp" value="<?php
             if(!empty($thread)) echo $thread;
-            ?>"/>
+            ?>" required="" />
         </li>
         <li>
-            <textarea name="txt_body" maxlength="1000" placeholder="Bericht"><?php if(!empty($body)) echo $body; ?></textarea>
+            <textarea name="txt_body" maxlength="1000" placeholder="Bericht" required=""><?php if(!empty($body)) echo $body; ?></textarea>
         </li>
         <li>
             <input type="submit" name="btn_send" value="Verzenden" />
