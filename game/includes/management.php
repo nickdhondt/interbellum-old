@@ -27,6 +27,7 @@ if (!empty($_SESSION["city_id"])) {
         $fields_buildings = array("headquarters", "steel_factory", "coal_mine", "woodchopper", "storage", "kitchen");
         $buildings_data = get_buildings_data($city_id, $fields_buildings);
         $building_info = get_building_game_info();
+        $building_level_info = get_building_level_info();
     } else {
         // If the active city is not owned by the user, the user will be redirected to the login page
         header("Location: ../index.php");
