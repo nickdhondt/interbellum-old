@@ -14,15 +14,26 @@ include "includes/pageparts/header.php";
 ?>
         <h1><?php echo $city_data["name"]; ?></h1>
         <div class="container">
+            <table>
+                <tr>
+                    <th>Gebouw</th>
+                    <th>Level</th>
+                </tr>
             <?php
-            // Under construction
+                // Loop through the buildings returned by the get_buildings_data() function
+                // Display the data in a table showing the level and building name
                 foreach ($buildings_data as $building => $level) {
-                    echo "<a href='" . $building_info[$building][1] . ".php'>" . $building_info[$building][0] . "</a> (level " . $level . ")<br />";
+                    ?>
+                    <tr>
+                    <?php
+                    echo "<td><strong><a href='" . $building_info[$building][1] . ".php'>" . $building_info[$building][0] . "</a></strong></td>";
+                    echo "<td>" . $level . "</td>"
+                    ?>
+                    </tr>
+                        <?php
                 }
             ?>
-        </div>
-        <div class="smallcontainer">
-
+            </table>
         </div>
     <?php
 
