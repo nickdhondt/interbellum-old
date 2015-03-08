@@ -150,13 +150,13 @@ if($rand2 === 0) {
                 <a href="city.php"><?php echo $city_data["name"]; ?></a>
             </li>
             <li>
-                <strong>Staal:</strong> <?php echo round($city_data["steel"], 0) ?>
+                <strong>Staal:</strong> <?php echo ceil($city_data["steel"]) ?>
             </li>
             <li>
-                <strong>Steenkool:</strong> <?php echo round($city_data["coal"], 0) ?>
+                <strong>Steenkool:</strong> <?php echo ceil($city_data["coal"]) ?>
             </li>
             <li>
-                <strong>Hout:</strong> <?php echo round($city_data["wood"], 0) ?>
+                <strong>Hout:</strong> <?php echo ceil($city_data["wood"]) ?>
             </li>
         </ul>
     </div>
