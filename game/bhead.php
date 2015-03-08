@@ -104,7 +104,7 @@ include "includes/pageparts/header.php";
             }
             foreach ($uncompleted_tasks as $task) {
                 // Loop through all the running tasks and put them in a table with the time of completion
-                $time_to_complete = format_time($task["update_time"] - time());
+                $time_to_complete = format_time($task["update_time"] - microtime(true));
                 ?>
                 <tr>
                         <?php
@@ -151,11 +151,11 @@ include "includes/pageparts/header.php";
                             if($storage_capacity < $costs["steel"] || $storage_capacity < $costs["coal"] || $storage_capacity < $costs["wood"]) {
                                 echo "<li><span class=\"upgrade_condition\">De capaciteit van je warenhuis is te laag</span></li>";
                                 // If the currently available resources are lower than the cost of an upgrade, the time until the resources are available is shown
-                            } elseif (round($city_data["steel"]) < $costs["steel"] || round($city_data["coal"]) < $costs["coal"] || round($city_data["wood"]) < $costs["wood"]) {
+                            } elseif (ceil($city_data["steel"]) < $costs["steel"] || ceil($city_data["coal"]) < $costs["coal"] || ceil($city_data["wood"]) < $costs["wood"]) {
                                 // Calculate the shortages of resources
-                                $steel_shortage = $costs["steel"] - ($city_data["steel"]);
-                                $coal_shortage = $costs["coal"] - ($city_data["coal"]);
-                                $wood_shortage = $costs["wood"] - ($city_data["wood"]);
+                                $steel_shortage = $costs["steel"] - $city_data["steel"];
+                                $coal_shortage = $costs["coal"] - $city_data["coal"];
+                                $wood_shortage = $costs["wood"] - $city_data["wood"];
 
                                 // Calculate the resources per hour for each resource
                                 $steel_per_hour = calculate_resource_per_hour($building_level_info["steel_factory"]["base_gain"] , $buildings_data["steel_factory"], $building_level_info["steel_factory"]["resource_constant"]);
