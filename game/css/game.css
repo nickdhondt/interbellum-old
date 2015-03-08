@@ -10,6 +10,10 @@ h1 {
     margin-top: 0;
 }
 
+h1.tooltip {
+    display: inline-block;
+}
+
 h2 {
     font-size: 1.2em;
     margin-top: 0;
@@ -267,7 +271,7 @@ nav ul li, #citycontext ul li.href{
 
 #citycontext ul li {
     float: left;
-    margin: 10px;
+    margin: 10px 15px;
 }
 
 nav > ul > li:hover, #citycontext ul li.href:hover {
