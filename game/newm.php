@@ -123,7 +123,7 @@ output_errors($errors);
                 <img class="info" src="img/info_icon.svg" alt="info" />
             </div>
             <div class="info-hover">
-                Plaats een komma tussen meerdere gebruikers. "gebruiker een, gebruiker twee, etc."
+                Plaats een komma tussen meerdere gebruikers. "Obama, Vladimir, Esteban, etc."
             </div>
         </li>
         <li>
