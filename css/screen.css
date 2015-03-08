@@ -168,3 +168,22 @@ li a div {
 li:last-child {
     margin-bottom: 0;
 }
+
+ul.errors {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+ul.errors li {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #cb1212;
+    border: none;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+ul.errors li:hover {
+    box-shadow: none;
+}

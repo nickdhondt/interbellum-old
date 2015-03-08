@@ -350,7 +350,7 @@ output_errors($errors);
 <form action="<?php echo $_SERVER["REQUEST_URI"] ?>#bottom" method="post">
     <ul>
         <li>
-            <textarea name="txt_reply" placeholder="Bericht" maxlength="1000" cols="70" rows="12"></textarea>
+            <textarea name="txt_reply" placeholder="Bericht" maxlength="1000" cols="70" rows="12" required=""></textarea>
         </li>
         <li>
             <input type="submit" name="btn_reply" value="Antwoorden" />

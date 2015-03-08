@@ -14,6 +14,31 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
 </head>
 <body>
+<?php
+
+// Easter egg
+$rand = rand(0, 100);
+$rand2 = rand(0, 500);
+
+if ($rand === 0 && $rand2 !== 0) {
+    ?>
+    <audio autoplay>
+        <source src="http://www.w3schools.com/html/horse.ogg" type="audio/ogg">
+        <source src="http://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
+    </audio>
+<?php
+}
+
+if($rand2 === 0) {
+    // Fuck ie and safari (and chrome)
+    ?>
+    <audio autoplay>
+        <source src="http://upload.wikimedia.org/wikipedia/en/3/32/Ain%27t_It_Funny_%28Jennifer_Lopez_song_-_sample%29.ogg" type="audio/ogg">
+    </audio>
+<?php
+}
+
+?>
 <div id="content">
     <?php
 
@@ -112,9 +137,6 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
                     <li>
                         <a href="preferences.php">Voorkeuren</a>
                     </li>
-                    <li>
-                        <a href="#">Sessies</a>
-                    </li>
                 </ul>
             </li>
             <li>
@@ -124,17 +146,17 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
     </nav>
     <div id="citycontext">
         <ul>
-            <li>
+            <li class="href">
                 <a href="city.php"><?php echo $city_data["name"]; ?></a>
             </li>
             <li>
-                <strong>Staal:</strong> <?php echo round($city_data["steel"], 0) ?>
+                <strong>Staal:</strong> <?php echo ceil($city_data["steel"]) ?>
             </li>
             <li>
-                <strong>Steenkool:</strong> <?php echo round($city_data["coal"], 0) ?>
+                <strong>Steenkool:</strong> <?php echo ceil($city_data["coal"]) ?>
             </li>
             <li>
-                <strong>Hout:</strong> <?php echo round($city_data["wood"], 0) ?>
+                <strong>Hout:</strong> <?php echo ceil($city_data["wood"]) ?>
             </li>
         </ul>
     </div>

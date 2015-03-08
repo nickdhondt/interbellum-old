@@ -14,8 +14,6 @@
  * user_data()
  * update_user()
  * user_logged_in()
- * get_session_data()
- * get_session_hash()
  * make_thread()
  * make_message()
  * make_thread_breadcrumbs()
@@ -33,8 +31,6 @@
  * get_last_message()
  * format_elapsed_seconds()
  * thread_recipients()
- * make_session()
- * update_session()
  * delete_breadcrumb()
  * count_all_messages()
  * display_pages()
@@ -67,6 +63,8 @@
  * count_all_users()
  * mass_update_breadcrumbs()
  * mass_get_thread_data()
+ * prepare_where_clause()
+ * format_time()
  *
  */
 
@@ -186,7 +184,9 @@ function get_building_level_info() {
 
 // Calculates the building speed improvement when upgrading buildings
 // The returned double is between 0 and 1, so by multiplying the building time (in seconds) with this coefficient you get a smeller building time
-function calculate_speed_improvement($level, $constant, $current_building_seconds) {
+function calculate_speed_improvement($level, $current_building_seconds) {
+    $level_info = get_building_level_info();
+    $constant = $level_info["headquarters"]["building_speed_constant"];
     return (pow($constant, $level) * $current_building_seconds);
 }
 
@@ -198,9 +198,9 @@ function calculate_population_storage($base, $level, $constant) {
 // Calculates the costs of all resources and returns an array with the calculated values
 function calculate_cost($steel, $coal, $wood, $level, $cost_constant) {
     $cost = array();
-    $cost["steel"] = round(($level * $level * $level) * $cost_constant) + $steel;
-    $cost["coal"] = round(($level * $level * $level) * $cost_constant) + $coal;
-    $cost["wood"] = round(($level * $level * $level) * $cost_constant) + $wood;
+    $cost["steel"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($steel * ($level * $level) / 2));
+    $cost["coal"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($coal * ($level * $level) / 2));
+    $cost["wood"] = round(((($level * $level * $level) * $cost_constant) * .8) + ($wood * ($level * $level) / 2));
 
     return $cost;
 }
@@ -209,7 +209,7 @@ function calculate_cost($steel, $coal, $wood, $level, $cost_constant) {
 function output_errors($errors) {
     // Check if the array contains elements
     if (!empty($errors)) {
-        echo "<ul>";
+        echo "<ul class=\"errors\">";
         // Loop through the elements and puts them in a list
         foreach($errors as $error) {
             echo "<li>" . $error . "</li>";
@@ -307,44 +307,6 @@ function user_logged_in () {
         }
     } else {
         return false;
-    }
-}
-
-/* Session */
-
-// Will be deleted in favour of a better "remember me" system
-function get_session_data($session_id, $fields) {
-    global $connection;
-
-    if (empty($fields)) {
-        $sql_fields = "*";
-    } else {
-        $sql_fields = implode(", ", $fields);
-    }
-
-    $sql = mysqli_query($connection, "SELECT $sql_fields FROM session WHERE id=$session_id");
-
-    if (!$sql) {
-        return mysqli_error($connection);
-    } else {
-        return mysqli_fetch_assoc($sql);
-    }
-}
-
-// Will be deleted in favour of a better "remember me" system
-function get_session_hash($session_id) {
-    global $connection;
-
-    $sql = mysqli_query($connection, "SELECT remember_hash FROM session WHERE id=$session_id");
-
-    if (!$sql) {
-        return mysqli_error($connection);
-    } else {
-        if (mysqli_num_rows($sql) >= 1) {
-            return true;
-        } else {
-            return false;
-        }
     }
 }
 
@@ -658,6 +620,8 @@ function get_last_message ($thr_id) {
     }
 }
 
+// Format the elapsed time
+// Exemples: 16m, 5h, 12d, etc
 function format_elapsed_seconds ($seconds) {
     if ($seconds <= 3540 && $seconds >= 0) {
         return ceil($seconds/60) . "m";
@@ -668,80 +632,77 @@ function format_elapsed_seconds ($seconds) {
     } elseif ($seconds > 2678399) {
         return "+31d";
     } else {
-        return "?";
+        return "?d";
     }
 }
 
+// Selects all recipient ids and statuses of users who read or did not read a conversation. Not users who have deleted the conversation (status = 2)
 function thread_recipients ($thr_id) {
     global $connection;
 
+    // SQL statement
     $sql = mysqli_query($connection, "SELECT user_id, status FROM thr_recipient WHERE thr_id=$thr_id AND (status=0 OR status=1)");
 
+    // Return an error if the query failed
     if (!$sql) {
         return mysqli_error($connection);
     } else {
+        // Put all the user ids and statuses in a multidimensional array
         $all_recipients_id = array();
         $loop = 0;
         while($recipient_id = mysqli_fetch_assoc($sql)) {
             $all_recipients_id[$loop]["user_id"] = $recipient_id["user_id"];
             $all_recipients_id[$loop]["status"] = $recipient_id["status"];
 
+            // Increment loop number with one
             $loop++;
         }
+
+        // Return the array
         return $all_recipients_id;
     }
 }
 
-function make_session($user_id, $remember_hash, $user_agent) {
-    global $connection;
-
-    if (mysqli_query($connection, "INSERT INTO session (user_id, remember_hash, user_agent) VALUES ($user_id, '$remember_hash', '$user_agent')")) {
-        return mysqli_insert_id($connection);
-    } else {
-        return mysqli_error($connection);
-    }
-
-}
-
-function update_session($session_id, $fields) {
-    global $connection;
-
-    $values = prepare_fields($fields);
-
-    if (mysqli_query($connection, "UPDATE session SET $values WHERE id=$session_id")) {
-        return true;
-    } else {
-        return mysqli_error($connection);
-    }
-
-}
-
+// Delete a thread breadcrumb
 function delete_breadcrumb($thr_id, $user_id) {
     global $connection;
 
+    // Count the current members of the conversation
     $active_members = count(thread_recipients($thr_id));
 
+    // If there are less than 2 members (this means only the user is in the conversation), the complete breadcrumb gets deleted
     if ($active_members < 2) {
+        // Delete the breadcrumb, return true if it succeeded
         if(mysqli_query($connection, "DELETE FROM thr_recipient WHERE thr_id=$thr_id")) {
             return true;
         } else {
             return mysqli_error($connection);
         }
     } else {
+        // If there are members left in the conversation, change the status to 2, meaning "deleted"
         $fields = array("status" => 2);
-        update_breadcrumb($thr_id, $user_id, $fields);
-        return true;
+        $update_breadcrumb = update_breadcrumb($thr_id, $user_id, $fields);
+        // If the breadcrumb was updated successfully true is returned. If it failed to update the received error is returned
+        if ($update_breadcrumb === true) {
+            return $update_breadcrumb;
+        } else {
+            return "Breadcrumb update error: " . $update_breadcrumb;
+        }
     }
 }
 
+// Counts all messages in a conversation
 function count_all_messages($thr_id) {
     global $connection;
 
+    // SQL statement
     $sql = mysqli_query($connection, "SELECT COUNT(id) FROM message WHERE thr_id=$thr_id");
 
     if (!$sql) {
+        // return an error if the statement failed
         return mysqli_error($connection);
     } else {
+        // Return the number of messages if the statement succeeded
         $count_messages_array = mysqli_fetch_assoc($sql);
         return $count_messages_array["COUNT(id)"];
     }
@@ -942,7 +903,7 @@ function get_city_data($city_id, $fields) {
     }
 }
 
-function get_buildings_data($city_id, $fields) {
+    function get_buildings_data($city_id, $fields) {
     global $connection;
 
     if (!empty ($fields)) {
@@ -992,9 +953,22 @@ function update_resources($city_id) {
     if (!empty($task_data["storage"])) {
         $storage_upgrades = count($task_data["storage"]);
     } else {
+        //$task_data["storage"] = array("upgrade" => 0);
         $storage_upgrades = 0;
     }
+    /*
+        foreach ($task_data["storage"] as $storage_data) {
+            if ($storage_data === 0) {
 
+            } else {
+                if ($storage_data["building"] === "storage") {
+
+                }
+            }
+
+            print_r($storage_data);
+        }
+    */
     if ($storage_upgrades === 0) {
         if ($deserved_steel <= $storage_capacity) {
             if (!empty($task_data["steel_factory"])) {
@@ -1005,7 +979,7 @@ function update_resources($city_id) {
 
             if ($steel_factory_upgrades === 0) {
                 $steel_factory_level = $buildings_data["steel_factory"];
-                $no_action_interval = time() - $city_data["update_time"];
+                $no_action_interval = microtime(true) - $city_data["update_time"];
                 if ($steel_factory_level > 0) {
                     $steel_per_hour = calculate_resource_per_hour($building_info["steel_factory"]["base_gain"], $steel_factory_level, $building_info["steel_factory"]["resource_constant"]);
                 } else {
@@ -1025,7 +999,7 @@ function update_resources($city_id) {
                     }
                     $i++;
                 }
-                $deserved_steel_array[] = ($steel_per_hour / 3600) * (time() - $task_data["steel_factory"][$i-1]["update_time"]);
+                $deserved_steel_array[] = ($steel_per_hour / 3600) * (microtime(true) - $task_data["steel_factory"][$i-1]["update_time"]);
                 $deserved_steel = 0;
                 foreach($deserved_steel_array as $deserved_steel_part) {
                     $deserved_steel += $deserved_steel_part;
@@ -1042,7 +1016,7 @@ function update_resources($city_id) {
 
             if ($coal_mine_upgrades === 0) {
                 $coal_mine_level = $buildings_data["coal_mine"];
-                $no_action_interval = time() - $city_data["update_time"];
+                $no_action_interval = microtime(true) - $city_data["update_time"];
                 if ($coal_mine_level > 0) {
                     $coal_per_hour = calculate_resource_per_hour($building_info["coal_mine"]["base_gain"], $coal_mine_level, $building_info["coal_mine"]["resource_constant"]);
                 } else {
@@ -1062,7 +1036,7 @@ function update_resources($city_id) {
                     }
                     $i++;
                 }
-                $deserved_coal_array[] = ($coal_per_hour / 3600) * (time() - $task_data["coal_mine"][$i - 1]["update_time"]);
+                $deserved_coal_array[] = ($coal_per_hour / 3600) * (microtime(true) - $task_data["coal_mine"][$i - 1]["update_time"]);
                 $deserved_coal = 0;
                 foreach ($deserved_coal_array as $deserved_coal_part) {
                     $deserved_coal += $deserved_coal_part;
@@ -1080,7 +1054,7 @@ function update_resources($city_id) {
 
             if ($woodchopper_upgrades === 0) {
                 $woodchopper_level = $buildings_data["woodchopper"];
-                $no_action_interval = time() - $city_data["update_time"];
+                $no_action_interval = microtime(true) - $city_data["update_time"];
                 if ($woodchopper_level > 0) {
                     $wood_per_hour = calculate_resource_per_hour($building_info["woodchopper"]["base_gain"], $woodchopper_level, $building_info["woodchopper"]["resource_constant"]);
                 } else {
@@ -1100,7 +1074,7 @@ function update_resources($city_id) {
                     }
                     $i++;
                 }
-                $deserved_wood_array[] = ($wood_per_hour / 3600) * (time() - $task_data["woodchopper"][$i - 1]["update_time"]);
+                $deserved_wood_array[] = ($wood_per_hour / 3600) * (microtime(true) - $task_data["woodchopper"][$i - 1]["update_time"]);
                 $deserved_wood = 0;
                 foreach ($deserved_wood_array as $deserved_wood_part) {
                     $deserved_wood += $deserved_wood_part;
@@ -1109,6 +1083,8 @@ function update_resources($city_id) {
         }
     } else {
         foreach ($task_data["storage"] as $storage_data) {
+            $storage_capacity = round(calculate_storage_capacity($building_info["storage"]["base_capacity"], $storage_data["level"], $building_info["storage"]["capacity_constant"]));
+
             if ($deserved_steel <= $storage_capacity) {
                 if (!empty($task_data["steel_factory"])) {
                     $steel_factory_upgrades = count($task_data["steel_factory"]);
@@ -1118,7 +1094,7 @@ function update_resources($city_id) {
 
                 if ($steel_factory_upgrades === 0) {
                     $steel_factory_level = $buildings_data["steel_factory"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = microtime(true) - $storage_data["update_time"];
                     if ($steel_factory_level > 0) {
                         $steel_per_hour = calculate_resource_per_hour($building_info["steel_factory"]["base_gain"], $steel_factory_level, $building_info["steel_factory"]["resource_constant"]);
                     } else {
@@ -1138,7 +1114,7 @@ function update_resources($city_id) {
                         }
                         $i++;
                     }
-                    $deserved_steel_array[] = ($steel_per_hour / 3600) * (time() - $task_data["steel_factory"][$i-1]["update_time"]);
+                    $deserved_steel_array[] = ($steel_per_hour / 3600) * (microtime(true) - $task_data["steel_factory"][$i-1]["update_time"]);
                     $deserved_steel = 0;
                     foreach($deserved_steel_array as $deserved_steel_part) {
                         $deserved_steel += $deserved_steel_part;
@@ -1155,7 +1131,7 @@ function update_resources($city_id) {
 
                 if ($coal_mine_upgrades === 0) {
                     $coal_mine_level = $buildings_data["coal_mine"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = microtime(true) - $storage_data["update_time"];
                     if ($coal_mine_level > 0) {
                         $coal_per_hour = calculate_resource_per_hour($building_info["coal_mine"]["base_gain"], $coal_mine_level, $building_info["coal_mine"]["resource_constant"]);
                     } else {
@@ -1175,7 +1151,7 @@ function update_resources($city_id) {
                         }
                         $i++;
                     }
-                    $deserved_coal_array[] = ($coal_per_hour / 3600) * (time() - $task_data["coal_mine"][$i - 1]["update_time"]);
+                    $deserved_coal_array[] = ($coal_per_hour / 3600) * (microtime(true) - $task_data["coal_mine"][$i - 1]["update_time"]);
                     $deserved_coal = 0;
                     foreach ($deserved_coal_array as $deserved_coal_part) {
                         $deserved_coal += $deserved_coal_part;
@@ -1193,7 +1169,7 @@ function update_resources($city_id) {
 
                 if ($woodchopper_upgrades === 0) {
                     $woodchopper_level = $buildings_data["woodchopper"];
-                    $no_action_interval = time() - $storage_data["time"];
+                    $no_action_interval = microtime(true) - $storage_data["update_time"];
                     if ($woodchopper_level > 0) {
                         $wood_per_hour = calculate_resource_per_hour($building_info["woodchopper"]["base_gain"], $woodchopper_level, $building_info["woodchopper"]["resource_constant"]);
                     } else {
@@ -1213,7 +1189,7 @@ function update_resources($city_id) {
                         }
                         $i++;
                     }
-                    $deserved_wood_array[] = ($wood_per_hour / 3600) * (time() - $task_data["woodchopper"][$i - 1]["update_time"]);
+                    $deserved_wood_array[] = ($wood_per_hour / 3600) * (microtime(true) - $task_data["woodchopper"][$i - 1]["update_time"]);
                     $deserved_wood = 0;
                     foreach ($deserved_wood_array as $deserved_wood_part) {
                         $deserved_wood += $deserved_wood_part;
@@ -1237,7 +1213,7 @@ function update_resources($city_id) {
     }
 
     $fields = array(
-        "update_time" => time(),
+        "update_time" => microtime(true),
         "steel" => $deserved_steel,
         "coal" => $deserved_coal,
         "wood" => $deserved_wood
@@ -1266,7 +1242,7 @@ function get_resource_task_timings($city_id, $select_all = true) {
     if ($select_all === true) {
         $sql = mysqli_query($connection, "SELECT building, update_time, level FROM task WHERE city_id=$city_id AND (building='steel_factory' OR building='coal_mine' OR building='woodchopper' OR building='storage') ORDER BY time ASC");
     } else {
-        $current_time = time();
+        $current_time = microtime(true);
         $sql = mysqli_query($connection, "SELECT building, update_time, level FROM task WHERE city_id=$city_id AND (building='steel_factory' OR building='coal_mine' OR building='woodchopper' OR building='storage') AND time<$current_time ORDER BY time ASC");
     }
     $timing_data = array();
@@ -1303,7 +1279,7 @@ function update_city($city_id, $fields) {
 
 function delete_completed_tasks($city_id) {
     global $connection;
-    $current_time = time();
+    $current_time = microtime(true);
 
    if(mysqli_query($connection, "DELETE FROM task WHERE update_time<=$current_time AND city_id=$city_id")) {
        return true;
@@ -1324,7 +1300,7 @@ function legal_building($building) {
 function buildings_next_level($city_id) {
     global $connection;
 
-    $current_time = time();
+    $current_time = microtime(true);
     $all_buildings = get_building_game_info();
 
     $buildings_list = array();
@@ -1357,15 +1333,15 @@ function buildings_next_level($city_id) {
     }
 }
 
-function create_task($city_id, $building, $level, $time_constant) {
+function create_task($city_id, $building, $level, $time_constant, $headquarters_level) {
     global $connection;
 
     $start_time = get_task_time($city_id);
 
     if (!empty($start_time)) {
-        $building_time = (int)$start_time + calculate_building_time($level, $time_constant);
+        $building_time = (int)$start_time + calculate_building_time($level, $time_constant, $headquarters_level);
     } else {
-        $building_time = time() + calculate_building_time($level, $time_constant);
+        $building_time = microtime(true) + calculate_building_time($level, $time_constant, $headquarters_level);
     }
 
     if (mysqli_query($connection, "INSERT INTO task (city_id, building, level, update_time) VALUES ($city_id, '$building', $level, $building_time)")) {
@@ -1388,14 +1364,16 @@ function get_task_time($city_id) {
     }
 }
 
-function calculate_building_time($level, $constant) {
-    return 30 + (($level * $level * $level) * $constant);
+function calculate_building_time($level, $constant, $headquarters_level) {
+    $level_info = get_building_level_info();
+
+    return 30 + (($level * $level * $level) * $constant) * calculate_speed_improvement($headquarters_level, $level_info["headquarters"]["building_speed_constant"]);
 }
 
 function upgrade_buildings($city_id) {
     global $connection;
 
-    $current_time = time();
+    $current_time = microtime(true);
 
     $sql = mysqli_query($connection, "SELECT building, level FROM task WHERE city_id=$city_id AND update_time<=$current_time ORDER BY update_time ASC");
 
@@ -1407,7 +1385,7 @@ function upgrade_buildings($city_id) {
             $fields[$completed_task["building"]] = $completed_task["level"];
         }
         if (!empty($fields)) {
-            echo update_building($city_id, $fields);
+            update_building($city_id, $fields);
         }
         return true;
     }
@@ -1428,7 +1406,7 @@ function update_building($city_id, $fields) {
 function get_future_tasks($city_id) {
     global $connection;
 
-    $current_time = time();
+    $current_time = microtime(true);
 
     $sql = mysqli_query($connection, "SELECT building, level, update_time FROM task WHERE city_id=$city_id AND update_time>$current_time");
 
@@ -1481,6 +1459,11 @@ function html_page_title($filename) {
         "preferences" => "Voorkeuren" . $title_suffix,
         "settings" => "Instellingen" . $title_suffix,
         "delm" => "Succesvol verwijderd" . $title_suffix,
+        "bsteel" => "Staalfabriek" . $title_suffix,
+        "bcoal" => "Kolenmijn" . $title_suffix,
+        "bwood" => "Houthakker" . $title_suffix,
+        "bstorage" => "Warenhuis" . $title_suffix,
+        "bkitchen" => "Refter" . $title_suffix,
     );
 
     // If the title array contains a title for the current page, the title is set to the specified title
@@ -1639,4 +1622,13 @@ function mass_get_thread_data($thr_ids) {
 function prepare_where_clause($field, $values) {
     // We format the data the WHERE clause will understand
     return "(" . $field . "=" . implode(" OR " . $field . "=", $values) . ")";
+}
+
+// Return a time (received in seconds) in this format: hh:mm:ss
+function format_time($seconds) {
+    $hours = floor($seconds / 3600);
+    $mins = floor(($seconds - ($hours*3600)) / 60);
+    $secs = floor($seconds % 60);
+
+    return $hours . ":" . sprintf("%02d", $mins) . ":" . sprintf("%02d", $secs);
 }

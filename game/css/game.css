@@ -10,19 +10,17 @@ h1 {
     margin-top: 0;
 }
 
+h1.tooltip {
+    display: inline-block;
+}
+
 h2 {
     font-size: 1.2em;
+    margin-top: 0;
+}
+
+p.last {
     margin-bottom: 0;
-    margin-top: 0;
-}
-
-h2 + p {
-    margin-top: 0;
-}
-
-p {
-    margin-bottom: 1em;
-    margin-left: 0.6em;
 }
 
 footer div:first-of-type {
@@ -74,18 +72,100 @@ div#content {
     width: 960px;
 }
 
+a:hover {
+    color: #00b900;
+}
+
 a {
-    color: #000087;
+    color: #008c00;
     text-decoration: none;
 }
 
-a:hover {
-    color: #0000c3;
+a:active {
+    color: #373737;
 }
 
-a:active {
-    color: #00002d;
+div.info {
+    display: inline-block;
+    position: relative;
 }
+
+img.info {
+    height: 16px;
+    width: 16px;
+    z-index: 0;
+}
+
+div.info ~ div.info-hover {
+    display: none;
+    font-size: 0.8em;
+    opacity: 0;
+    margin-left: 10px;
+}
+
+div.info:hover ~ div.info-hover{
+    display: inline-block;
+    opacity: 1;
+    position: absolute;
+    width: 300px;
+    border: 1px solid #808080;
+    background: #F5F5F5;
+    padding: 8px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+ul.show_resources li {
+    list-style-type: none;
+    float:left;
+    padding-right: 0.6em;
+    padding-left: 0.6em;
+}
+
+span.upgrade_condition {
+    color: #cb1212;
+}
+
+table td, table th {
+    text-align: left;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    padding: 10px;
+    overflow: hidden;
+    width: 100px;
+}
+
+table tr {
+    margin-bottom: 5px;
+}
+
+table td:first-of-type, table th:first-of-type {
+    border-left: 1px solid #808080;
+}
+
+table td:last-of-type, table th:last-of-type {
+    border-right: 1px solid #808080;
+}
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+ul.errors {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+ul.errors li {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    color: #cb1212;
+}
+
+
 
 
 
@@ -184,21 +264,22 @@ nav ul:after {
     display: block;
 }
 
-nav ul li{
+nav ul li, #citycontext ul li.href{
     float: left;
+    margin: 0;
 }
 
 #citycontext ul li {
     float: left;
-    margin: 10px;
+    margin: 10px 15px;
 }
 
-nav > ul > li:hover {
+nav > ul > li:hover, #citycontext ul li.href:hover {
     background: #ffffff;
     box-shadow: 0 0 3px rgba(0,0,0,0.5);
 }
 
-nav ul li a {
+nav ul li a, #citycontext ul li.href a {
     display: inline-block;
     padding: 10px 15px;
     text-decoration: none;
@@ -206,11 +287,11 @@ nav ul li a {
     height: 23px;
 }
 
-nav ul li a:hover {
+nav ul li a:hover, #citycontext ul li.href a:hover {
     color: #000000;
 }
 
-nav > ul > li > a:hover {
+nav > ul > li > a:hover, #citycontext > ul > li.href a:hover {
     padding: 10px 14px;
     border-left: 1px solid #808080;
     border-right: 1px solid #808080;
@@ -299,6 +380,10 @@ div#clear {
     clear: both;
 }
 
+div.clear {
+    clear: both;
+}
+
 
 
 
@@ -348,6 +433,15 @@ form {
     background: #ffffff;
 }
 
+form.upgrade {
+    width: 556px;
+    margin-bottom: 10px;
+}
+
+form.upgrade:last-of-type {
+    margin: 0;
+}
+
 input[type=submit] {
     width: 578px;
     border: 1px solid #808080;
@@ -358,7 +452,11 @@ input[type=submit] {
     cursor: pointer;
 }
 
-input[type=submit]:hover {
+form.upgrade input[type=submit] {
+    width: 556px;
+}
+
+  input[type=submit]:hover {
     box-shadow: 0 0 3px rgba(0,0,0,0.5);
 }
 
@@ -440,40 +538,4 @@ section.othermessage {
 
 div.container section:last-child {
     margin-bottom: 0;
-}
-
-div.info {
-    display: inline-block;
-    position: relative;
-}
-
-img.info {
-    height: 16px;
-    width: 16px;
-    z-index: 0;
-}
-
-div.info ~ div.info-hover {
-    display: none;
-    font-size: 0.8em;
-    opacity: 0;
-    margin-left: 10px;
-}
-
-div.info:hover ~ div.info-hover{
-    display: inline-block;
-    opacity: 1;
-    position: absolute;
-    width: 300px;
-    border: 1px solid #808080;
-    background: #F5F5F5;
-    padding: 8px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-}
-
-ul.show_resources li {
-    list-style-type: none;
-    float:left;
-    padding-right: 0.6em;
-    padding-left: 0.6em;
 }
