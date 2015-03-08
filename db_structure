@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `city` (
   `steel` decimal(11,5) NOT NULL,
   `wood` decimal(11,5) NOT NULL,
   `coal` decimal(11,5) NOT NULL,
-  `update_time` int(11) NOT NULL,
+  `update_time` decimal(16,5) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
