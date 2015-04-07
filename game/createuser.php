@@ -7,7 +7,7 @@ $username = ""; $clearance="";
 if(isset($_POST["submit"]))
 {
     //Check if everything is filled in.
-    if((isset($_POST["username"])) && (isset($_POST["password"])) && (isset($_POST["confirm_password"])) && (isset($_POST["clearance"])))
+    if((isset($_POST["username"])) && (isset($_POST["password"])) && (isset($_POST["confirm_password"])) && (!empty($_POST["clearance"])))
     {
         //Check if the password-check is correct.
         if($_POST["password"] !== $_POST["confirm_password"]){
@@ -16,7 +16,7 @@ if(isset($_POST["submit"]))
 
         //Process the order.
         if($confirm_error !== true){
-            //SET HERE THE PARSE CODE
+            make_user($_POST["username"], $_POST["password"], $_POST["clearance"]);
         }
 
     } else {
@@ -79,7 +79,9 @@ $options = get_pernicktions();
                 foreach($options as $option)
                 {
                     $pernicktion = $option["pernicktion"];
-                    ?><option <?php if(isset($clearance)){if($clearance === $pernicktion) echo " selected";} ?>><?php echo $pernicktion; ?></option><?php
+                    $auth_id = $option["auth_id"];
+                    ?><option value="<?php echo $auth_id ?>" <?php if(isset($clearance)){if($clearance === $auth_id) echo " selected";} ?>>
+                        <?php echo $pernicktion; ?></option><br/><?php
                     }
                 ?>
             </select><br/>
@@ -98,14 +100,19 @@ $options = get_pernicktions();
     {
         global $connection;
         $result = array();
-        $query = $connection->query("SELECT pernicktion FROM authentication ORDER BY auth_id ASC");
+        $query = $connection->query("SELECT auth_id, pernicktion FROM authentication ORDER BY auth_id ASC");
         while($row = $query->fetch_array(MYSQLI_ASSOC)){
             $result[] = $row;
         }
+        $connection->close();
         return $result;
     }
 
-    function make_user()
+    function make_user($username, $password, $auth_level)
     {
-        echo "gelukt";
+        global $connection;
+        $query = $connection->prepare('INSERT user(username, password, auth_level) SET VALUES(?, ?, ?)');
+        $query->bind_param('ssi', $username, $password, $auth_level);
+        $query->execute();
+        $connection->close();
     }
