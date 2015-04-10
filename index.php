@@ -130,6 +130,10 @@ if (!empty($_POST["btn_login"])) {
 // Page header (including html head, etc)
 include "includes/header.php";
 
+?>
+<aside>
+<?php
+
 // Main content
 $user_logged_in = user_logged_in();
 
@@ -150,6 +154,22 @@ if ($user_logged_in ===  false) {
     // The list with options a user has once logged in
     include "includes/loggedin.php";
 }
+
+?>
+    </aside>
+    <div id="container">
+        <h1>Interbellum</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed orci tortor, bibendum a ultricies et, venenatis non lorem. Nulla facilisi. Vivamus imperdiet neque ut facilisis mattis. Suspendisse placerat gravida velit, eget mollis lorem consequat ac. Cras fermentum, arcu quis vestibulum ultrices, tortor urna commodo turpis, sit amet faucibus velit urna vitae libero. In sit amet fermentum leo, eu mollis libero. Fusce non purus faucibus, efficitur lectus eu, pellentesque velit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <div id="register_area">
+            <div id="register_button">
+                <a href="#">
+                    <div>Registreer</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix"></div>
+        <?php
 
 // Page footer
 include "includes/footer.php";

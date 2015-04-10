@@ -3,9 +3,8 @@
 // Note: this file is not in the /game/includes directory, but in the /includes directory
 require_once "../includes/functions.php";
 
-//Get The user ID.
-$user_id = user_logged_in();
-if($user_id === false) die;
+include "includes/management.php";
+
 
 //Build the current page
 include "includes/pageparts/header.php";
@@ -14,19 +13,19 @@ include "includes/pageparts/header.php";
 $pernicktion = get_full_name_pernicktion(get_auth_level($user_id));
 ?>
 
-<h1>Pernicktion Error</h1>
-<p>This page cannot be entered by you as <?php echo $pernicktion ?>.</p>
+<h1>Pernicktion error</h1>
+<p>De opgevraagde pagina kan niet bekeken worden als "<?php echo $pernicktion ?>".</p>
 
-<h2>Return To The Game</h2>
+<h2>Ga terug naar:</h2>
 <ul>
     <li>
-        <a href="index.php">Your City</a>
+        <a href="city.php">Je stad</a>
     </li>
     <li>
-        <a href="messages.php">Your Messages</a>
+        <a href="messages.php">Je Inbox</a>
     </li>
     <li>
-        <a href="../index.php">The Homepage</a>
+        <a href="../index.php">De Homepagina</a>
     </li>
 </ul>
 
