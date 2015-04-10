@@ -65,7 +65,9 @@
  * mass_get_thread_data()
  * prepare_where_clause()
  * format_time()
- *
+ * get_auth_level()
+ * validate_clearance()
+ * get_full_name_pernicktions()
  */
 
 // This file is included at the top of each page. The microtime at the beginning of the script is saved in a variabele
@@ -1631,4 +1633,58 @@ function format_time($seconds) {
     $secs = floor($seconds % 60);
 
     return $hours . ":" . sprintf("%02d", $mins) . ":" . sprintf("%02d", $secs);
+}
+
+function get_auth_level($user_id)
+{
+    //Get the connection string
+    global $connection;
+    $auth_level = "";
+
+    //MYSQLI STATEMENT
+    $stmt = mysqli_prepare($connection, "SELECT auth_level FROM user WHERE id = ?");
+
+    mysqli_stmt_bind_param($stmt, 'i', $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
+    {
+        $auth_level = $row["auth_level"];
+    }
+
+    return $auth_level;
+
+}
+
+function validate_clearance($user_auth_level, $required_auth_level)
+{
+    if($user_auth_level >= $required_auth_level)
+    {
+        return true;
+    }
+    else{
+        header('location: nopernicktion.php');
+        die;
+    }
+}
+
+function get_full_name_pernicktion($auth_level)
+{
+    //get the connection string
+    global $connection;
+    $full_name = "";
+
+    //MYSQLI Statement
+    $stmt = mysqli_prepare($connection, "SELECT pernicktion FROM authentication WHERE auth_id = ?");
+    mysqli_stmt_bind_param($stmt, 'i', $auth_level);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    while($row = mysqli_fetch_array($result, MYSQLI_ASSOC))
+    {
+        $full_name = $row["pernicktion"];
+    }
+
+    return $full_name;
 }

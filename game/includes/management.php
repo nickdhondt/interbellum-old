@@ -8,6 +8,14 @@ if ($user_id === false) {
     die();
 }
 
+//Foreach page, it's necessary to check whether the user has the right to access the specified page.
+    //Each page will declare the required authentication level in a variable '$clearance' prior to this page.
+if(isset($clearance))
+{
+    $user_auth_level = get_auth_level($user_id);
+    validate_clearance($user_auth_level,$clearance);
+}
+
 // There needs to be a city set as "active", this is done in "initial.php"
 // User will be redirected to the login page, if there is no city set as active
 // The city in the session variable is considered active

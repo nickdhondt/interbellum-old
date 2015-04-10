@@ -1,4 +1,5 @@
 <?php
+$clearance = 0;   //The minimum required auth_level in order to access this page. NOTE: a user must be this level or higher.
 
 // functions.php is required
 // Note: this file is not in the /game/includes directory, but in the /includes directory
