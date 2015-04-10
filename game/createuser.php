@@ -1,8 +1,38 @@
 <?php
-require_once "../includes/database/connect.php";
+$clearance = 3;   //The minimum required auth_level in order to access this page. NOTE: a user must be this level or higher.
+
+require_once "../includes/functions.php";
+
+include "includes/management.php";
+
+include "includes/pageparts/header.php";
+
+//Functions of this page.
+function get_pernicktions()
+{
+    global $connection;
+    $result = array();
+    $query = mysqli_query($connection, "SELECT auth_id, pernicktion FROM authentication ORDER BY auth_id ASC");
+    while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
+        $result[] = $row;
+    }
+
+    return $result;
+}
+
+function make_user($username, $password, $auth_level)
+{
+    global $connection;
+    $query = mysqli_prepare($connection, 'INSERT INTO user (username, password, auth_level) VALUES(?, ?, ?)');
+    echo mysqli_error($connection);
+    mysqli_stmt_bind_param($query, 'ssi', $username, $password, $auth_level);
+    mysqli_stmt_execute($query);
+}
+
+
 $confirm_error = false;
 $username = "";
-$clearance="";
+$post_clearance="";
 $success = false;
 
 //Check the Postback
@@ -42,7 +72,7 @@ if(isset($_POST["submit"]))
             $confirm_password = $_POST["confirm_password"];
         }
         if(isset($_POST["clearance"])){
-            $clearance = $_POST["clearance"];
+            $post_clearance = $_POST["clearance"];
         }
         if((isset($password)) && (isset($confirm_password))){
             if($password !== $confirm_password){
@@ -56,76 +86,33 @@ if(isset($_POST["submit"]))
 $options = get_pernicktions();
 
 ?>
-<!doctype html>
-<html lang="nl-be">
-<head>
-    <meta charset="UTF-8">
-    <title>Create User Page</title>
-    <link rel="icon" href="../img/favicon.png" type="image/png">
-    <link rel="stylesheet" type="text/css" href="css/game.css">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'/>
-</head>
-<body>
-<main>
-    <?php if ($success === true) echo "Gebruiker toegevoegd!"; ?>
+    <h1>Gebruiker aanmaken</h1>
+<?php if ($success === true) echo "<h2>Gebruiker toegevoegd!</h2>"; ?>
     <form method="post" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
-        <div>
-            <h1>Create a User</h1>
-        </div>
-        <div>
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" value="<?php if(isset($username)) echo $username; ?>"/><br/>
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password" value="<?php if(isset($password)) echo $password; ?>"/><br/>
-            <label for="confirm_password">Confirm Password:</label>
-            <input type="password" name="confirm_password" id="confirm_password"/>
-            <?php if((isset($confirm_error)) && $confirm_error) echo "Uw ingave komt niet overeen met het opgegeven passwoord." ?><br/>
-        </div>
-        <div>
-            <label for="clearance">Level of Clearance:</label>
-            <select name="clearance" id="clearance">
-                <option disabled>Select the Clearance:</option>
-                <?php
-                foreach($options as $option)
-                {
-                    $pernicktion = $option["pernicktion"];
-                    $auth_id = $option["auth_id"];
-                    ?><option value="<?php echo $auth_id ?>" <?php if(isset($clearance)){if($clearance === $auth_id) echo " selected";} ?>>
-                        <?php echo $pernicktion; ?></option><br/><?php
-                    }
-                ?>
-            </select><br/>
-        </div><br/>
-        <div>
-            <input type="submit" name="submit" id="submit"/>
-        </div>
+            <ul>
+                <li><input type="text" name="username" id="username" value="<?php if(isset($username)) echo $username; ?>" placeholder="Gebruikersnaam"/></li>
+                <li><input type="password" name="password" id="password" value="<?php if(isset($password)) echo $password; ?>" placeholder="Wachtwoord"/></li>
+                <li><input type="password" name="confirm_password" id="confirm_password" placeholder="Wachtworod herhalen"/>
+                    <?php if((isset($confirm_error)) && $confirm_error) echo "Uw ingave komt niet overeen met het opgegeven passwoord." ?></li>
+                <li><label for="clearance">Level of Clearance:</label>
+                    <select name="clearance" id="clearance">
+                        <option disabled>Select the Clearance:</option>
+                        <?php
+                        foreach($options as $option)
+                        {
+                            $pernicktion = $option["pernicktion"];
+                            $auth_id = $option["auth_id"];
+                            ?><option value="<?php echo $auth_id ?>" <?php if(isset($post_clearance)){if($post_clearance === $auth_id) echo " selected";} ?>>
+                            <?php echo $pernicktion; ?></option><br/><?php
+                        }
+                        ?>
+                    </select></li>
+                <li>            <input type="submit" name="submit" id="submit" value="Maak gebruiker"/>
+                </li>
+            </ul>
     </form>
-</main>
-</body>
-</html>
-
 <?php
-//Functions of this page.
-    function get_pernicktions()
-    {
-        global $connection;
-        $result = array();
-        $query = mysqli_query($connection, "SELECT auth_id, pernicktion FROM authentication ORDER BY auth_id ASC");
-        while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
-            $result[] = $row;
-        }
 
-        return $result;
-    }
+include "includes/pageparts/footer.php";
 
-    function make_user($username, $password, $auth_level)
-    {
-        global $connection;
-        $query = mysqli_prepare($connection, 'INSERT INTO user (username, password, auth_level) VALUES(?, ?, ?)');
-        echo mysqli_error($connection);
-        mysqli_stmt_bind_param($query, 'ssi', $username, $password, $auth_level);
-        mysqli_stmt_execute($query);
-    }
-mysqli_close($connection);
+?>

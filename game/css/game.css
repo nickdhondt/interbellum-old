@@ -1,5 +1,14 @@
 /* General */
 
+form.invisible {
+    width: auto;
+    border: 0;
+    background: none;
+    margin: 0;
+    padding: 0;
+
+}
+
 body {
     font-family: "Open Sans", sans-serif;
     color: #000000;
@@ -209,7 +218,7 @@ ul.errors li {
     margin: 10px 0 0 0;
     text-align: center;
     color: #000000;
-    z-index: 1;
+    z-index: 2;
 }
 
 nav {
@@ -222,7 +231,7 @@ nav {
     margin: 10px 0 0 0;
     text-align: center;
     color: #000000;
-    z-index: 2;
+    z-index: 3;
 }
 
 nav ul ul {
@@ -480,6 +489,26 @@ input[type=text]:focus {
     border: 1px solid #808080;
 }
 
+input[type=password] {
+    font-family: "Open Sans", sans-serif;
+    font-size: 0.8em;
+    width: 200px;
+    padding: 5px;
+    border: 1px solid #808080;
+    background: #ffffff;
+}
+
+input[type=password]:hover {
+    background: #fafafa;
+    border: 1px solid #808080;
+}
+
+input[type=password]:focus {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    background: #ffffff;
+    border: 1px solid #808080;
+}
+
 
 
 
@@ -538,4 +567,220 @@ section.othermessage {
 
 div.container section:last-child {
     margin-bottom: 0;
+}
+
+
+
+
+
+/* Map */
+
+
+div#map {
+    background: #f5f5f5;
+    border: 1px solid #808080;
+    width: 560px;
+    height: 560px;
+    float: left;
+    display: inline-block;
+    margin-right: 10px;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    cursor: default;
+    overflow: hidden;
+}
+
+div.large_container {
+    width: 916px;
+    padding: 10px;
+    border: 1px solid #808080;
+    background: #ffffff;
+}
+
+div#buttons {
+    opacity: 0;
+    transition: opacity 0.5s;
+    margin: 10px;
+}
+
+div#information {
+    float: left;
+    width: 322px;
+    padding: 10px;
+    background: #f5f5f5;
+    border: 1px solid #808080;
+    transition: content 1s;
+}
+
+div#clear {
+    clear: both;
+}
+
+div#go_up {
+    height: 41px;
+    width: 454px;
+    margin-left: 42px;
+    border: 1px solid #808080;
+    border-bottom: none;
+    background: #ffffff;
+    cursor: pointer;
+    background-image: url("../img/button_up_icon.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 44px 22px;
+}
+
+div#go_left:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.50);
+}
+
+div#go_up:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.50);
+}
+
+div#go_down:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.50);
+}
+
+div#go_right:hover {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.50);
+}
+
+div#go_left {
+    float: left;
+    width: 41px;
+    height: 454px;
+    border: 1px solid #808080;
+    border-right: none;
+    background: #ffffff;
+    cursor: pointer;
+    background-image: url("../img/button_left_icon.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 22px 44px;
+}
+
+div#land {
+    position: relative;
+    float: left;
+    width: 455px;
+    height: 455px;
+    border-bottom: 1px solid #808080;
+    background: #ffffff;
+    z-index: 1;
+}
+
+div#go_right {
+    float: left;
+    width: 41px;
+    height: 454px;
+    border: 1px solid #808080;
+    background: #ffffff;
+    cursor: pointer;
+    background-image: url("../img/button_right_icon.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 22px 44px;
+}
+
+div#go_down {
+    height: 41px;
+    width: 454px;
+    margin-left: 42px;
+    border: 1px solid #808080;
+    border-top: none;
+    background: #ffffff;
+    clear: both;
+    cursor: pointer;
+    background-image: url("../img/button_down_icon.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 44px 22px;
+}
+
+div#land > div {
+    float: left;
+    background: #ffffff;
+    width: 64px;
+    height: 64px;
+    border-top: 1px solid #808080;
+    border-left: 1px solid #808080;
+}
+
+div#land > div.interactive:hover {
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.8) inset;
+}
+
+div#land > div.owncity {
+    background-color: #dfdf00;
+    cursor: pointer;
+}
+
+div#land > div.owncity:hover {
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.8) inset;
+}
+
+div#land > div.othercity {
+    background-color: #ae3636;
+    cursor: pointer;
+}
+
+div#land > div.othercity:hover {
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.8) inset;
+}
+
+div#land > div.hill {
+    background-color: #008000;
+}
+
+div#land > div.grass {
+    background-color: #00a700;
+}
+
+
+div#land > div.range {
+    background-color: #005800;
+}
+
+div#land span.coord {
+    font-size: 0.7em;
+    color: #f5f5f5;
+    margin: 2px;
+    padding: 2px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+span.href {
+    cursor: pointer;
+    color: #008c00;
+}
+
+span.href:hover {
+    color: #00b900;
+}
+
+span.href:active {
+    color: #373737;
+}
+
+div.opacity {
+    width: 64px;
+    height: 64px;
+    background: rgba(185, 185, 185, 0);
+}
+
+div#loader {
+    padding: 240px 240px;
+    width: 80px;
+    height: 80px;
+    position: relative;
+    top: -560px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+    z-index: 1;
 }
