@@ -1,5 +1,5 @@
 <?php
-$clearance = 1;   //The minimum required auth_level in order to access this page. NOTE: a user must be this level or higher.
+$clearance = 0;   //The minimum required auth_level in order to access this page. NOTE: a user must be this level or higher.
 
 require_once "../includes/functions.php";
 
