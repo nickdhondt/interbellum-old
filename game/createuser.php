@@ -1,22 +1,33 @@
 <?php
 require_once "../includes/database/connect.php";
 $confirm_error = false;
-$username = ""; $clearance="";
+$username = "";
+$clearance="";
+$success = false;
 
 //Check the Postback
 if(isset($_POST["submit"]))
 {
     //Check if everything is filled in.
-    if((isset($_POST["username"])) && (isset($_POST["password"])) && (isset($_POST["confirm_password"])) && (!empty($_POST["clearance"])))
+    if(!empty($_POST["username"]) && !empty($_POST["password"]) && !empty($_POST["confirm_password"]) && (!empty($_POST["clearance"]) || $_POST["clearance"] === "0"))
     {
         //Check if the password-check is correct.
         if($_POST["password"] !== $_POST["confirm_password"]){
+            echo "error";
             $confirm_error = true;
         }
 
         //Process the order.
         if($confirm_error !== true){
-            make_user($_POST["username"], $_POST["password"], $_POST["clearance"]);
+            // Hash the password
+            $options = [
+                'cost' => 10,
+            ];
+
+            $hash = password_hash($_POST["password"], PASSWORD_BCRYPT, $options);
+
+            make_user($_POST["username"], $hash, $_POST["clearance"]);
+            $success = true;
         }
 
     } else {
@@ -56,6 +67,7 @@ $options = get_pernicktions();
 </head>
 <body>
 <main>
+    <?php if ($success === true) echo "Gebruiker toegevoegd!"; ?>
     <form method="post" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
         <div>
             <h1>Create a User</h1>
@@ -69,12 +81,12 @@ $options = get_pernicktions();
             <input type="password" name="password" id="password" value="<?php if(isset($password)) echo $password; ?>"/><br/>
             <label for="confirm_password">Confirm Password:</label>
             <input type="password" name="confirm_password" id="confirm_password"/>
-            <?php if((isset($confirm_error)) && $confirm_error) echo "Uw ingave komt niet overeen met het opgegeven paswoord." ?><br/>
+            <?php if((isset($confirm_error)) && $confirm_error) echo "Uw ingave komt niet overeen met het opgegeven passwoord." ?><br/>
         </div>
         <div>
             <label for="clearance">Level of Clearance:</label>
             <select name="clearance" id="clearance">
-                <option selected disabled>Select the Clearance:</option>
+                <option disabled>Select the Clearance:</option>
                 <?php
                 foreach($options as $option)
                 {
@@ -100,19 +112,20 @@ $options = get_pernicktions();
     {
         global $connection;
         $result = array();
-        $query = $connection->query("SELECT auth_id, pernicktion FROM authentication ORDER BY auth_id ASC");
-        while($row = $query->fetch_array(MYSQLI_ASSOC)){
+        $query = mysqli_query($connection, "SELECT auth_id, pernicktion FROM authentication ORDER BY auth_id ASC");
+        while($row = mysqli_fetch_array($query, MYSQLI_ASSOC)){
             $result[] = $row;
         }
-        $connection->close();
+
         return $result;
     }
 
     function make_user($username, $password, $auth_level)
     {
         global $connection;
-        $query = $connection->prepare('INSERT user(username, password, auth_level) SET VALUES(?, ?, ?)');
-        $query->bind_param('ssi', $username, $password, $auth_level);
-        $query->execute();
-        $connection->close();
+        $query = mysqli_prepare($connection, 'INSERT INTO user (username, password, auth_level) VALUES(?, ?, ?)');
+        echo mysqli_error($connection);
+        mysqli_stmt_bind_param($query, 'ssi', $username, $password, $auth_level);
+        mysqli_stmt_execute($query);
     }
+mysqli_close($connection);
