@@ -3,12 +3,92 @@ body {
     font-size: 1em;
 }
 
+nav div#show_nav, nav div#hide_nav {
+    display: none;
+}
+
 main {
-    width: 328px;
-    padding: 10px;
+    width: 80%;
+    max-width: 60em;
+    padding: 1em;
     border: 1px solid #808080;
-    margin: 100px auto 10px auto;
+    margin: 0 auto 10px auto;
     background: #f5f5f5;
+}
+
+header {
+    width: 80%;
+    max-width: 60em;
+    border: 1px solid #808080;
+    margin: 0 auto 10px auto;
+    background: #f5f5f5;
+    text-align: center;
+    padding: 0 1em;
+}
+
+nav > ul > li {
+    display: inline-block;
+    border-left: 1px solid rgba(255, 255, 255, 0);
+    border-right: 1px solid rgba(255, 255, 255, 0);
+}
+
+nav > ul > li:hover {
+    border-left: 1px solid #808080;
+    border-right: 1px solid #808080;
+    background: #fff;
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+nav > ul > li > a > div {
+    padding: 0.75em;
+}
+
+aside, div#container {
+    float: left;
+}
+
+div#register_area {
+    margin-top: 1em;
+    padding-top: 1em;
+    border-top: 1px solid #808080;
+}
+
+div#register_button {
+    margin: auto;
+    background: #fff;
+    width: 80%;
+    text-align: center;
+    border: 1px solid #808080;
+}
+
+div#register_button:hover {
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+}
+
+div#register_button > a {
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: #000;
+}
+
+div#register_button > a > div {
+    padding: 1em;
+}
+
+aside {
+    border-right: 1px solid #808080;
+    padding-right: 1em;
+    margin-right: 1em;
+    width: 20em;
+}
+
+div#container {
+    width: calc(100% - 22.1em);
+}
+
+div.clearfix {
+    clear: both;
 }
 
 p {
@@ -35,7 +115,7 @@ form li:last-child {
 }
 
 input[type=submit] {
-    width: 328px;
+    width: 100%;
     border: 1px solid #808080;
     padding: 8px;
     font-family: "Open Sans", sans-serif;
@@ -51,7 +131,7 @@ input[type=submit]:hover {
 input[type=text] {
     font-family: "Open Sans", sans-serif;
     font-size: 0.8em;
-    width: 310px;
+    width: calc(100% - 1.4em);
     padding: 8px;
     border: 1px solid #808080;
     background: #ffffff;
@@ -71,7 +151,7 @@ input[type=text]:focus {
 input[type=password] {
     font-family: "Open Sans", sans-serif;
     font-size: 0.8em;
-    width: 310px;
+    width: calc(100% - 1.4em);
     padding: 8px;
     border: 1px solid #808080;
     background: #ffffff;
@@ -146,13 +226,13 @@ ul:first-of-type {
     margin: 0;
 }
 
-main > ul > li {
+aside > ul > li {
     margin-bottom: 10px;
     border: 1px solid #808080;
     background: #ffffff;
 }
 
-main > ul > li:hover {
+aside  > ul > li:hover {
     box-shadow: 0 0 3px rgba(0,0,0,0.5);
 }
 
@@ -161,7 +241,7 @@ li a {
     color: #000000;
 }
 
-li a div {
+aside li a div {
     padding: 8px;
 }
 
@@ -186,4 +266,113 @@ ul.errors li {
 
 ul.errors li:hover {
     box-shadow: none;
+}
+
+nav label {
+    display: none;
+}
+
+@media screen and (max-device-width: 640px) {
+    aside, div#container {
+        float: none;
+        display: block;
+    }
+
+    div#container, aside {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    aside {
+        margin-bottom: 1em;
+        padding-bottom: 1em;
+        border-bottom: 1px solid #808080;
+    }
+
+    main, header {
+        width: calc(100% - 2.1em);
+    }
+
+    header {
+        margin: auto;
+        border-bottom: 0;
+        padding: 1em;
+        text-align: left;
+        min-height: 2.5em;
+    }
+
+    main {
+        border-top: 0;
+        padding-top: 0;
+    }
+
+    nav > ul > li {
+        display: block;
+        width: calc(100% - 2px);
+        background: #fff;
+        border: 1px solid #808080;
+        margin-top: 10px;
+    }
+
+    nav > ul > li:first-of-type {
+        margin-top: 2em;
+    }
+
+    nav > ul > li > a > div {
+        padding: .5em;
+    }
+
+    div#content {
+        border-top: 1px solid #808080;
+        padding-top: 1em;
+    }
+
+    input[type=checkbox]:checked ~ ul {
+        display: inherit;
+    }
+
+    input[type=checkbox] ~ ul {
+        display: none;
+    }
+
+    input[type=checkbox] {
+        display: none;
+    }
+
+    nav input[type=checkbox]:checked + label:before {
+        content: "";
+        font-size: 1em;
+        color: #000000;
+        text-align: center;
+        line-height: 1em;
+    }
+
+    nav input[type=checkbox]:hover + label:before {
+        box-shadow: none;
+    }
+
+    nav label:before {
+        content: "";
+        display: inline-block;
+        width: 2.5em;
+        height: 2.5em;
+        margin-right: inherit;
+        position: absolute;
+        left: 0;
+        bottom: -1.4em;
+        background-color: inherit;
+        background: url("../img/show_nav.svg");
+        border: none;
+    }
+
+    nav label {
+        font-size: 1em;
+        display: inline-block;
+        cursor: pointer;
+        position: relative;
+        padding: 0;
+        margin: 0;
+    }
 }
