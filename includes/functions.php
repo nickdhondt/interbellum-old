@@ -1696,3 +1696,29 @@ function get_full_name_pernicktion($auth_level)
 
     return $full_name;
 }
+
+
+function get_map_data($x, $y, $size) {
+    global $connection;
+
+    $citys = array();
+
+    $radius = floor($size / 2);
+
+    $x_min = $x - $radius;
+    $x_max = $x + $radius;
+    $y_min = $y - $radius;
+    $y_max = $y + $radius;
+
+    $sql_map_data = mysqli_query($connection, "SELECT c.x, c.y, c.id AS city_id, c.name as cityname, c.user_id, u.username FROM city c INNER JOIN user u ON c.user_id=u.id WHERE x>=" . $x_min . " AND x<=" . $x_max . " AND y>=" . $y_min . " AND y<=" . $y_max);
+
+    if (!$sql_map_data) {
+        return mysqli_error($connection);
+    } else {
+        while($city = mysqli_fetch_assoc($sql_map_data)) {
+            $citys[] = $city;
+        }
+
+        return $citys;
+    }
+}

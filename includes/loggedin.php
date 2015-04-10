@@ -1,6 +1,6 @@
 <ul>
     <li>
-        <a href="game/initial.php?messages"><div>Doorgaan</div></a>
+        <a href="game/initial.php"><div>Doorgaan</div></a>
     </li>
     <li>
         <a href="game/initial.php?settings"><div>Instellingen</div></a>

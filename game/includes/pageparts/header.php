@@ -12,13 +12,15 @@ $title = html_page_title($_SERVER["SCRIPT_FILENAME"]);
     <link rel="icon" href="../img/favicon.png" type="image/png">
     <link rel="stylesheet" type="text/css" href="css/game.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+    <script src="js/game.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 <body>
 <?php
 
 // Easter egg
-$rand = rand(0, 100);
-$rand2 = rand(0, 500);
+$rand = rand(0, 1000);
+$rand2 = rand(0, 5000);
 
 if ($rand === 0 && $rand2 !== 0) {
     ?>
@@ -130,6 +132,9 @@ if($rand2 === 0) {
             </li>
             <li>
                 <a href="basic_ranking.php">Ranglijst</a>
+            </li>
+            <li>
+                <a href="map.php">Kaart</a>
             </li>
             <li>
                 <a href="settings.php">Instellingen</a>
