@@ -1635,6 +1635,14 @@ function format_time($seconds) {
     return $hours . ":" . sprintf("%02d", $mins) . ":" . sprintf("%02d", $secs);
 }
 
+function contains_letters_and_number($string) {
+    if (preg_match('/[a-zA-Z]/', $string) && preg_match('/\d/', $string)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function get_auth_level($user_id)
 {
     //Get the connection string
