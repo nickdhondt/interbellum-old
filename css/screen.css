@@ -1,0 +1,461 @@
+/* General */
+
+* {
+    padding: 0;
+    margin: 0;
+    outline: none;
+}
+
+h1, h2, h3 {
+    font-weight: normal;
+    margin-bottom: .8em;
+}
+
+ul {
+    list-style: none;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-size: 1em;
+    margin: 0 0 56px;
+    background: #fbf7df;
+    font-family: "Open Sans", sans-serif;
+}
+
+.cf {
+    clear: both;
+}
+
+.href, #hamburger {
+    cursor: pointer;
+}
+
+#shade {
+    background: rgba(0, 0, 0, .3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    cursor: pointer;
+}
+
+/* Interbellum Notifications */
+
+#int_notif {
+    z-index: 9999;
+    position: fixed;
+    width: 100%;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+}
+
+#int_notif > div {
+    padding: .5em;
+    background: rgba(0, 0, 0, .5);
+    width: 100%;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity .2s ease;
+}
+
+/* Forms */
+
+#signin_notice {
+    font-size: .8em;
+    color: #a0504b;
+    padding: .3em;
+    display: none;
+    margin-bottom: 1em;
+}
+
+.form_notice {
+    font-size: .8em;
+    color: #a0504b;
+    padding: .3em;
+    display: none;
+}
+
+input {
+    font-family: "Open Sans", sans-serif;
+}
+
+form li {
+    margin-bottom: 1em;
+}
+
+.two_buttons input[type=button] {
+    width: calc(50% - .38em);
+    margin-right: .5em;
+}
+
+.two_buttons input[type=button]:last-of-type {
+    margin: 0;
+}
+
+.vertical li {
+    display: inline-block;
+    width: calc(25% - .98em);
+    margin-right: 1em;
+    margin-bottom: 1em;
+
+}
+
+form li:last-of-type {
+    margin: 0;
+    width: 100%;
+}
+
+input[type=button] {
+    width: 100%
+}
+
+input[type=text], input[type=button], input[type=password], input[type=email] {
+    padding: .5em;
+    background: #fbf7df;
+    border: 1px solid #aea682;
+    font-size: 1em;
+    outline: none;
+}
+
+input[type=text], input[type=password], input[type=email] {
+    width: calc(100% - 1.1em);
+}
+
+input[type=text]:hover, input[type=button]:hover, input[type=password]:hover, input[type=email]:hover {
+    background: #ffffeb;
+    border: 1px solid #aea682;
+}
+
+input[type=text]:focus, input[type=button]:active, input[type=password]:focus, input[type=email]:focus {
+    background: #f4f0d8;
+    border: 1px solid #aea682;
+}
+
+input[type=button]:hover, input[type=text]:focus, input[type=password]:focus, input[type=email]:focus {
+    box-shadow: 0 0 2px rgba(0, 0, 0, .5);
+}
+
+.vertical li#lv {
+    margin-right: 0;
+
+}
+
+.vertical input[type=text] {
+    width: calc(100% - 1em);
+    text-align: center;
+}
+
+/* Header */
+
+#hamburger {
+    display: none;
+}
+
+nav {
+    text-align: right;
+    background: #d96459;
+    padding: 1em;
+    height: calc(88px - 2em);
+}
+
+nav ul {
+    position: relative;
+    display: inline-block;
+}
+
+nav > ul ul {
+    box-shadow: 0 3px 1px rgba(0, 0, 0, .4);
+}
+
+
+nav li {
+    float: left;
+    font-weight: bold;
+    margin-left: 1em;
+}
+
+nav a > div, nav span {
+    padding: 1em;
+    background: #f7eebf;
+    min-width: 5em;
+    text-align: center;
+}
+
+nav a > div:hover, nav span:hover {
+    background: #d7cea7;
+}
+
+nav a > div:active, nav span:active {
+    background: #fff6c6;
+}
+
+nav .accent div:first-of-type + div {
+    display: none;
+}
+
+nav .accent div:first-of-type + div li {
+    float: none;
+    margin: 0;
+}
+
+nav .accent div:first-of-type + div div {
+    padding: 1em;
+    background: #588c7e;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+}
+
+nav .accent div:first-of-type + div div:hover {
+    background: #72b1a3;
+}
+
+nav .accent div:first-of-type + div div:active {
+    background: #4a7a6c;
+}
+
+nav .accent span {
+    background: #588c7e;
+    color: #fff;
+}
+
+nav .accent span:hover {
+    background: #72b1a3;
+}
+
+nav .accent span:active {
+    background: #4a7a6c;
+}
+
+a {
+    text-decoration: none;
+    color: #000;
+}
+
+nav li > div {
+    padding-top: 1em;
+}
+
+/* Main */
+
+#lander {
+    height: 30em;
+    max-height: calc(80vh - 88px);
+    min-height: 14em;
+    display: flex;
+    background: #f2e394;
+}
+
+#lander p {
+    margin-bottom: 1em;
+}
+
+#lander > div {
+    margin: auto;
+    text-align: center;
+    font-size: 2.5em;
+}
+
+main > div > div {
+    width: 70%;
+    max-width: 60em;
+    margin: auto;
+    padding: 1em;
+}
+
+main > div {
+    //background: rgba(242, 227, 148, 0.30);
+}
+
+div#register {
+    background: #588c7e;
+    display: inline-block;
+    padding: .5em;
+    font-size: .7em;
+    color: #fff;
+    font-weight: bold;
+}
+
+div#register:hover {
+    background: #72b1a3;
+}
+
+div#register:active {
+    background: #4a7a6c;
+}
+
+/* Popups */
+
+#shade > div {
+    display: none;
+    position: relative;
+    cursor: auto;
+    top: 150px;
+    opacity: 0;
+    margin: auto;
+    width: 25em;
+    background: #f2e394;
+    padding: 1em;
+    transition: top .3s ease-out, opacity .3s ease-out;
+}
+
+/* Interactive */
+
+#key_correct {
+    margin-bottom: 1em;
+    text-align: center;
+    font-weight: bold;
+}
+
+#key_correct.correct {
+    color: #477366;
+}
+
+#key_correct.incorrect {
+    color: #a0504b;
+}
+
+/* Footer */
+
+footer {
+    text-align: center;
+    font-size: .8em;
+    width: calc(100% - 3em);
+    padding: 1.5em;
+    background: #f2e394;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 18px;
+}
+
+/* Jef */
+
+#jef {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    color: rgba(0, 0, 0, .1);
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 10em;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap
+}
+
+#jef div {
+    margin: auto;
+    height: 1em;
+    transform: rotate(-30deg);
+}
+
+#jef div:before {
+    content: "Jef Daels";
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+p:last-of-type {
+    margin: 0;
+}
+
+/* Mobile */
+
+@media screen and (max-width: 640px) {
+    /* Header */
+
+    #hamburger {
+        padding: 0;
+        display: inline-block;
+        background: url("../img/hamburger2.svg") 56px/56px;
+        height: 56px;
+        width: 56px;
+    }
+
+    #options_panel > ul {
+        display: block;
+        margin: 0 1em;
+        padding: 0;
+
+    }
+
+    nav ul {
+        display: none;
+        position: relative;
+        left: -1em;
+        background: #D96459;
+        width: calc(100% + 2em);
+        text-align: center;
+        padding-top: .7em;
+    }
+
+    nav > ul {
+        box-shadow: 0 3px 1px rgba(0, 0, 0, .4);
+    }
+
+    nav > ul ul {
+        box-shadow: none;
+    }
+
+    nav li, nav span {
+        width: calc(100% - 2em);
+        display: block;
+        margin-bottom: 1em;
+    }
+
+    nav a > div, nav span {
+        min-width: 0;
+    }
+
+    nav li > div {
+        padding-top: 0;
+    }
+
+    nav span {
+        margin: 0;
+    }
+
+    /* Main */
+
+    main > div > div {
+        width: calc(100% - 4em);
+        padding: 2em;
+    }
+
+    #lander > div {
+        width: 100%;
+        padding: 0 .8em;
+    }
+
+    #shade > div {
+        margin: auto;
+        width: calc(100vw - 4em);
+        max-width: 25em;
+        max-height: calc(100vh - 4em);
+        overflow: scroll;
+    }
+
+    /* Jef */
+
+    #jef {
+        font-size: 5em;
+    }
+
+    #jef div {
+        transform: rotate(60deg);
+    }
+}

@@ -1,0 +1,37 @@
+/* General */
+
+Find noticefield function
+Show nav when orientationchange
+Mobile nav gets stuck after login/logout actions
+Bug: check for login... everywhere
+Bug: async sign user out
+Bug: show popup notification only
+
+
+/* Register */
+
+Check if user is logged out when registering
+Special charcters not detecting if username exists
+Bug: Registerattempt must not be possible if data is not ok
+Bug: Bugtesting
+Bug: Better pasting key
+Bug: Show general errors through loop
+Bug: Add all general errors in one object (php)
+
+
+/* Sign in */
+
+Remember me feature
+
+/* Admin panel */
+
+Display older keys
+Filter older keys
+Remove older keys
+Show user list
+Change user permissions
+Ban users
+Remove users
+Search users
+Filter users
+Bug: overflow y
