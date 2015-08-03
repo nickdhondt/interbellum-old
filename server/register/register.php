@@ -4,7 +4,9 @@ session_start();
 
 require_once("../../resources/config.php");
 
+// Script will return JSON string
 header("Content-Type: application/json");
+// Parameters
 
 $legal = false;
 $response = array();
@@ -14,6 +16,7 @@ $errors = array();
 $can_register = true;
 
 if (!empty($_POST["data"])) {
+    // Decode the JSON data
     $post = json_decode($_POST["data"], true);
     if (!empty($post["key"]) || !empty($post["username"]) || !empty($post["password"]) || !empty($post["pass_repeat"]) || !empty($post["email"]) || !empty($post["terms"])){
         $data["registered"] = false;
@@ -147,7 +150,7 @@ if (!empty($_POST["data"])) {
 
         $data[] = $field;
 
-        /* General: register */
+        // General: register
 
         $field = array("field" => "general");
         $field_legal = true;
@@ -168,12 +171,15 @@ if (!empty($_POST["data"])) {
 
         $legal = true;
     } else {
+        // Set general errors
         $errors[] = "Not all data received";
     }
 } else {
+    // Set general errors
     $errors[] = "Received wrong data";
 }
 
+// Put it all in an array
 if ($legal === true) {
     $response = array(
         "legal" => $legal,
@@ -186,4 +192,5 @@ if ($legal === true) {
     );
 }
 
+// Decode and send
 echo json_encode($response);

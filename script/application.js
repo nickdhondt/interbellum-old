@@ -1,7 +1,7 @@
 "use strict";
 
 // Execute code when page has been loaded
-window.addEventListener("load", function(){init()});
+window.addEventListener("DOMContentLoaded", function(){init()});
 
 function init(){
     // Initiate events
@@ -11,6 +11,7 @@ function init(){
     login.initEvents();
     // Check if the key is valid (if one has been entered, see earlyAccess.checkKey())
     earlyAccess.checkKey();
+    new WebNotification("Old game moved to: interbellum.cf/w/oldgame", true);
 }
 
 // This logic makes the application
@@ -146,14 +147,14 @@ application = {
         // Make the options index based on the permission
         if (typeof permission !== "undefined") {
             options = [
-                ["Continue", true, "game", false],
+                ["Play", true, "game", false],
                 ["Account", true, "account", true],
                 [permission, true, "admin", true],
                 ["Sign out", false, "signout"]
             ];
         } else {
             options = [
-                ["Continue", true, "game"],
+                ["Play", true, "game"],
                 ["Account", true, "account"],
                 ["Sign out", false, "signout"]
             ];
@@ -261,7 +262,8 @@ login = {
                 // Add event listeners to the options menu toggle button and sign out button
                 document.getElementById("options").addEventListener("click", function(){application.toggleOptions()});
                 document.getElementById("signout").addEventListener("click", function(){application.signOut()});
-                application.optionsVisible = false;
+                application.optionsVisible = true;
+                document.getElementById("options_panel").style.display = "block";
 
                 // Clear the notice field node
                 var noticeField = document.getElementById("signin_notice");
@@ -442,7 +444,7 @@ register = {
         // Send the data poll using XmlHttpRequest
         // Execute register.interpretDataPoll after the request
         register.waitId = setTimeout(function(){
-            xhr.sendRequest("post", "data=" + JSON.stringify(userData), "server/register/check_user_data.php", register.interpretDataPoll);
+            xhr.sendRequest("post", "data=" + JSON.stringify(userData), "server/data/check_user_data.php", register.interpretDataPoll);
         }, 400);
     },
     interpretDataPoll: function(response) {
@@ -619,6 +621,8 @@ earlyAccess = {
         document.getElementById("btn_eak").addEventListener("click", function(){earlyAccess.attemptRegisterProgress()});
     },
     attemptRegisterProgress: function() {
+        // Show the register form popup if the key is valid
+        // Show a notification if the key is invalid
         if (earlyAccess.keyValid === true) {
             application.clearPopups();
             application.toggleRegister();
@@ -627,10 +631,12 @@ earlyAccess = {
         }
     },
     assistActions: function(e) {
+        // Limit the maximum character of a early access key field to 4
         if (e.target.value.length >= 4) {
             e.target.value = e.target.value.substr(0, 4);
             var nextListItem = e.target.parentNode.nextSibling;
 
+            // Focus and select the text (if any) in the next early access key field
             if (nextListItem.nodeType != 1) {
                 nextListItem = nextListItem.nextSibling;
             }
@@ -644,23 +650,29 @@ earlyAccess = {
         var eakFields = document.getElementsByName("txt_eak");
         earlyAccess.userKey = "";
 
+        // Add all early access key pieces together
         for (var i = 0; i < eakFields.length; i++) {
             earlyAccess.userKey += eakFields[i].value;
         }
 
+        // Check the length and send a XmlHttpRequest to the server
         if (earlyAccess.userKey.length >= 16) {
             var key = {
                 key: earlyAccess.userKey
             };
-            xhr.sendRequest("post", "data=" + JSON.stringify(key), "server/register/early_access.php", earlyAccess.interpretCheckKey);
+            // Execute earlyAccess.interpretCheckKey afterwards
+            xhr.sendRequest("post", "data=" + JSON.stringify(key), "server/eak/early_access.php", earlyAccess.interpretCheckKey);
         } else {
             document.getElementById("key_correct").innerHTML = "";
         }
     },
     interpretCheckKey: function(response) {
+        // Proceed if the request was successful
         if (xhr.requestSuccessful(response)) {
+            // Parse the JSON string
             var parsedResponse = support.parseJSON(response);
 
+            // Show the appropriate message based on the server return
             if (parsedResponse.eak[0].legal === true) {
                 document.getElementById("key_correct").className = "correct";
                 document.getElementById("key_correct").innerHTML = "Key is valid";

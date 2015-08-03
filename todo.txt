@@ -22,6 +22,7 @@ Bug: Add all general errors in one object (php)
 /* Sign in */
 
 Remember me feature
+Generate options based on settings object (when loading page)
 
 /* Admin panel */
 

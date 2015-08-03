@@ -1,0 +1,16 @@
+body {
+    font-family: "Open Sans", sans-serif;
+}
+
+a {
+    color: #2f39b0;
+}
+
+#dark {
+    cursor: pointer;
+    display: inline-block;
+}
+
+#dark:hover {
+    text-decoration: underline;
+}

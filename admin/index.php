@@ -6,7 +6,9 @@ require_once("../resources/config.php");
 
 $user_data = logged_in();
 
-if ($user_data["permission_type"] > 1 || !$user_data) header("Location: ../");
+// The user must have the appropriate permissions to access this page (2 or greater)
+// The user must also be logged in
+if ($user_data["permission_type"] >= 2 || !$user_data) header("Location: ../");
 
 ?>
 <!doctype html>
@@ -15,9 +17,9 @@ if ($user_data["permission_type"] > 1 || !$user_data) header("Location: ../");
     <meta charset="UTF-8">
     <title>Interbellum - <?php echo $user_data["description"] ?> panel</title>
     <script src="../script/shared.js"></script>
-    <script src="script/admin.js"></script>
+    <script src="script/application.js"></script>
     <meta name=viewport content="width=device-width, initial-scale=1">
-    <link rel="icon" href="../img/favicon.png" type="image/png">
+    <link rel="icon" href="../img/interbellum_icon_32.png" type="image/png">
     <link rel="stylesheet" type="text/css" href="css/screen.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro' rel='stylesheet' type='text/css'>

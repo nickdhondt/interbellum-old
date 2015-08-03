@@ -1,5 +1,6 @@
 <?php
 
+// Todo: include header
 session_start();
 
 require_once("resources/config.php");
@@ -15,11 +16,12 @@ $user_data = logged_in();
     <meta name="keywords" content="browsergame, gratis, multiplayer, mmo">
     <meta name=viewport content="width=device-width, initial-scale=1">
     <title>Interbellum - MMO (not yet that massive)</title>
-    <link rel="icon" href="img/favicon.png" type="image/png">
+    <link rel="icon" href="img/interbellum_icon_32.png" type="image/png">
     <link rel="stylesheet" type="text/css" href="css/screen.css">
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
     <script src="script/shared.js"></script>
     <script src="script/application.js"></script>
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 <div id="int_notif"></div>
@@ -28,7 +30,7 @@ $user_data = logged_in();
         <div id="hamburger"></div>
         <ul>
             <li>
-                <a href="">
+                <a href="index.php">
                     <div>
                         Home
                     </div>
@@ -58,7 +60,7 @@ $user_data = logged_in();
                     <div id="options_panel">
                         <ul>
                             <li>
-                                <a href="game"><div>Continue</div></a>
+                                <a href="game"><div>Play</div></a>
                             </li>
                             <li>
                                 <a href="account" target="_blank"><div>Account</div></a>
@@ -104,7 +106,7 @@ $user_data = logged_in();
     </div>
 </main>
 <footer>
-    &copy; Goldenratio Interactive
+    &copy; Goldenratio Interactive &mdash; [<a href="about/">About</a> &ndash; <a href="#">Goldenratio</a> &ndash; <a href="partners/">Partners</a>]
 </footer>
 <div id="shade">
     <div id="signin_popup">
@@ -154,7 +156,7 @@ $user_data = logged_in();
     <div id="register_popup">
         <h1>Register</h1>
         <form>
-            <ul id="register">
+            <ul id="register_form">
                 <li>
                     <input type="text" placeholder="Username" name="txt_username" maxlength="16"/>
                     <div class="form_notice"></div>
